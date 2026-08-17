@@ -1,4 +1,4 @@
-name: Build Fresh Android APK
+name: Build Local Business Services APK
 
 on:
   workflow_dispatch:
@@ -8,15 +8,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.35.0
 
-      - name: Create fresh Flutter project
+      - name: Create Flutter project structure
         run: |
           flutter create --org com.localbusinessservices --project-name local_business_services app
+          cp lib/main.dart app/lib/main.dart
 
       - name: Get packages
         working-directory: app
