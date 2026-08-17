@@ -567,7 +567,7 @@ class BusinessDetailsPage extends StatelessWidget {
       'https://www.google.com/maps/search/?api=1&query=$query',
     );
 
-    if (await canLaunchUrl(uri, mode: LaunchMode.externalApplication)) {
+    if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       showMessage(context, 'Google Maps could not be opened');
