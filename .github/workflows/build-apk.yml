@@ -32,6 +32,30 @@ jobs:
         run: |
           flutter pub add url_launcher
 
+      - name: Configure Android URL queries
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("app/android/app/src/main/AndroidManifest.xml")
+          text = path.read_text()
+
+          queries = """    <queries>
+              <intent>
+                  <action android:name="android.intent.action.VIEW" />
+                  <data android:scheme="tel" />
+              </intent>
+              <intent>
+                  <action android:name="android.intent.action.VIEW" />
+                  <data android:scheme="https" />
+              </intent>
+          </queries>
+          """
+
+          text = text.replace("</manifest>", queries + "</manifest>")
+          path.write_text(text)
+          PY
+
       - name: Build APK
         working-directory: app
         run: |
