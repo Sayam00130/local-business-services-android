@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -18,16 +15,18 @@ jobs:
 
       - name: Create Flutter project
         run: |
-          flutter create --org com.localbusinessservices --project-name local_business_services app
+          flutter create \
+            --org com.localbusinessservices \
+            --project-name local_business_services \
+            app
+
+      - name: Copy app code
+        run: |
           cp lib/main.dart app/lib/main.dart
 
-      - name: Add required packages
+      - name: Add packages
         working-directory: app
         run: flutter pub add url_launcher
-
-      - name: Get packages
-        working-directory: app
-        run: flutter pub get
 
       - name: Build APK
         working-directory: app
