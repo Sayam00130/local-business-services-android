@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
       - name: Checkout project
         uses: actions/checkout@v4
 
@@ -24,17 +23,20 @@ jobs:
             --project-name local_business_services \
             app
 
-      - name: Copy app code
+      - name: Copy main.dart
         run: |
           cp lib/main.dart app/lib/main.dart
 
-      - name: Add packages
+      - name: Add url_launcher
         working-directory: app
-        run: flutter pub add url_launcher
+        run: |
+          flutter pub add url_launcher
 
       - name: Build APK
         working-directory: app
-        run: flutter build apk --release
+        run: |
+          flutter pub get
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
