@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const LocalBusinessServicesApp());
@@ -535,6 +536,44 @@ class BusinessDetailsPage extends StatelessWidget {
     required this.business,
   });
 
+  Future<void> callBusiness(BuildContext context) async {
+    final uri = Uri.parse('tel:${business.phone}');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      showMessage(context, 'Could not open phone dialer');
+    }
+  }
+
+  Future<void> openWhatsApp(BuildContext context) async {
+    final phone = business.phone.replaceAll(RegExp(r'[^0-9]'), '');
+    final uri = Uri.parse(
+      'https://wa.me/$phone?text=Hello%20${Uri.encodeComponent(business.name)}',
+    );
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      showMessage(context, 'WhatsApp could not be opened');
+    }
+  }
+
+  Future<void> openMaps(BuildContext context) async {
+    final query = Uri.encodeComponent(
+      '${business.name}, ${business.location}',
+    );
+
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$query',
+    );
+
+    if (await canLaunchUrl(uri, mode: LaunchMode.externalApplication)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      showMessage(context, 'Google Maps could not be opened');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -543,7 +582,9 @@ class BusinessDetailsPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () => showMessage(context, 'Share option selected'),
+            onPressed: () {
+              showMessage(context, 'Share option selected');
+            },
           ),
         ],
       ),
@@ -555,6 +596,7 @@ class BusinessDetailsPage extends StatelessWidget {
             child: Icon(business.icon, size: 55),
           ),
           const SizedBox(height: 15),
+
           Text(
             business.name,
             textAlign: TextAlign.center,
@@ -563,13 +605,19 @@ class BusinessDetailsPage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           Text(
             business.category,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.grey),
           ),
+
           const SizedBox(height: 10),
-          Center(child: Text('⭐ ${business.rating}')),
+
+          Center(
+            child: Text('⭐ ${business.rating}'),
+          ),
+
           const SizedBox(height: 25),
 
           Row(
@@ -579,52 +627,81 @@ class BusinessDetailsPage extends StatelessWidget {
                 context,
                 Icons.call,
                 'Call',
-                'Call option selected',
+                () => callBusiness(context),
               ),
               actionButton(
                 context,
-                Icons.message,
-                'Message',
-                'Message option selected',
+                Icons.chat,
+                'WhatsApp',
+                () => openWhatsApp(context),
               ),
               actionButton(
                 context,
                 Icons.directions,
-                'Directions',
-                'Directions selected',
+                'Maps',
+                () => openMaps(context),
               ),
               actionButton(
                 context,
                 Icons.report,
                 'Report',
-                'Report option selected',
+                () {
+                  showMessage(context, 'Report option selected');
+                },
               ),
             ],
           ),
 
           const SizedBox(height: 25),
-          infoTile(Icons.location_on, business.location),
-          infoTile(Icons.phone, business.phone),
-          infoTile(Icons.access_time, 'Open today: 9:00 AM - 9:00 PM'),
+
+          infoTile(
+            Icons.location_on,
+            business.location,
+          ),
+
+          infoTile(
+            Icons.phone,
+            business.phone,
+          ),
+
+          infoTile(
+            Icons.access_time,
+            'Open today: 9:00 AM - 9:00 PM',
+          ),
 
           const SizedBox(height: 25),
+
           const Text(
             'Reviews & Ratings',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+
           const SizedBox(height: 10),
+
           const Card(
             child: ListTile(
-              leading: CircleAvatar(child: Icon(Icons.person)),
+              leading: CircleAvatar(
+                child: Icon(Icons.person),
+              ),
               title: Text('Customer Review'),
-              subtitle: Text('Great service and friendly staff.'),
+              subtitle: Text(
+                'Great service and friendly staff.',
+              ),
               trailing: Text('⭐ 5.0'),
             ),
           ),
+
           const SizedBox(height: 10),
+
           ElevatedButton.icon(
             onPressed: () {
-              showMessage(context, 'Review form will open here');
+              showMessage(
+                context,
+                'Review form will open here',
+              );
             },
             icon: const Icon(Icons.rate_review),
             label: const Text('Write a Review'),
@@ -638,12 +715,12 @@ class BusinessDetailsPage extends StatelessWidget {
     BuildContext context,
     IconData icon,
     String title,
-    String message,
+    VoidCallback onPressed,
   ) {
     return Column(
       children: [
         IconButton.filled(
-          onPressed: () => showMessage(context, message),
+          onPressed: onPressed,
           icon: Icon(icon),
         ),
         Text(title),
@@ -653,7 +730,10 @@ class BusinessDetailsPage extends StatelessWidget {
 
   Widget infoTile(IconData icon, String text) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blue),
+      leading: Icon(
+        icon,
+        color: Colors.blue,
+      ),
       title: Text(text),
     );
   }
