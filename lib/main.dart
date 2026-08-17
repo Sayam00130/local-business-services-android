@@ -760,4 +760,113 @@ class LoginPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           const Icon(Icons.account_circle, size: 100),
-          const SizedBox(heigh
+          const SizedBox(height: 20),
+          const TextField(
+            decoration: InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 15),
+          const TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              prefixIcon: Icon(Icons.lock),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              showMessage(context, 'Login system will be connected');
+            },
+            child: const Text('Login'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SignupPage(),
+                ),
+              );
+            },
+            child: const Text('Create New Account'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SignupPage extends StatelessWidget {
+  const SignupPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Account')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const TextField(
+            decoration: InputDecoration(
+              labelText: 'Full Name',
+              prefixIcon: Icon(Icons.person),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 15),
+          const TextField(
+            decoration: InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 15),
+          const TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              prefixIcon: Icon(Icons.lock),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              showMessage(context, 'Account creation system ready');
+            },
+            child: const Text('Sign Up'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NotificationsPage extends StatelessWidget {
+  const NotificationsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Notifications')),
+      body: const Center(
+        child: Text(
+          'No new notifications',
+          style: TextStyle(fontSize: 17),
+        ),
+      ),
+    );
+  }
+}
+
+void showMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
