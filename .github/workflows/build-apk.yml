@@ -16,10 +16,14 @@ jobs:
         with:
           channel: stable
 
-      - name: Create Flutter project structure
+      - name: Create Flutter project
         run: |
           flutter create --org com.localbusinessservices --project-name local_business_services app
           cp lib/main.dart app/lib/main.dart
+
+      - name: Add required packages
+        working-directory: app
+        run: flutter pub add url_launcher
 
       - name: Get packages
         working-directory: app
