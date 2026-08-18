@@ -23,20 +23,36 @@ jobs:
             --project-name local_business_services \
             app
 
-      - name: Copy application files
+      - name: Copy app files
         run: |
           cp lib/main.dart app/lib/main.dart
           cp pubspec.yaml app/pubspec.yaml
 
-      - name: Add Firebase and required packages
-        working-directory: app
+      - name: Create Firebase config
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          flutter pub get
+          printf '%s' "$GOOGLE_SERVICES_JSON" > app/android/app/google-services.json
+
+      - name: Add Google Services plugin
+        working-directory: app/android
+        run: |
+          sed -i "/plugins {/a\\    id 'com.google.gms.google-services' version '4.4.2' apply false" settings.gradle
+
+      - name: Apply Google Services plugin
+        working-directory: app/android/app
+        run: |
+          sed -i "/plugins {/a\\    id 'com.google.gms.google-services'" build.gradle.kts
 
       - name: Add Internet permission
         run: |
           sed -i '/<manifest/a\    <uses-permission android:name="android.permission.INTERNET"/>' \
           app/android/app/src/main/AndroidManifest.xml
+
+      - name: Get packages
+        working-directory: app
+        run: |
+          flutter pub get
 
       - name: Build APK
         working-directory: app
