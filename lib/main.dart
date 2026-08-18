@@ -26,9 +26,9 @@ class LocalBusinessServicesApp extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   MODEL
-============================================================ */
+// ============================================================
+// MODEL
+// ============================================================
 
 class Business {
   final String id;
@@ -54,9 +54,9 @@ class Business {
   });
 }
 
-/* ============================================================
-   HOME
-============================================================ */
+// ============================================================
+// HOME
+// ============================================================
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -70,13 +70,15 @@ class _HomePageState extends State<HomePage> {
   final List<Business> favorites = [];
 
   bool isFavorite(Business business) {
-    return favorites.any((b) => b.id == business.id);
+    return favorites.any((item) => item.id == business.id);
   }
 
   void toggleFavorite(Business business) {
     setState(() {
       if (isFavorite(business)) {
-        favorites.removeWhere((b) => b.id == business.id);
+        favorites.removeWhere(
+          (item) => item.id == business.id,
+        );
       } else {
         favorites.add(business);
       }
@@ -182,9 +184,9 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/* ============================================================
-   HOME TAB
-============================================================ */
+// ============================================================
+// HOME TAB
+// ============================================================
 
 class HomeTab extends StatelessWidget {
   final bool Function(Business) isFavorite;
@@ -202,18 +204,21 @@ class HomeTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Colors.blue, Colors.indigo],
+              colors: [
+                Colors.blue,
+                Colors.indigo,
+              ],
             ),
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(24),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Find Local Businesses',
+                'Discover Local Businesses',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 26,
@@ -222,7 +227,7 @@ class HomeTab extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                'Find businesses, services, shops and more.',
+                'Find businesses and services around the world.',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 15,
@@ -235,7 +240,7 @@ class HomeTab extends StatelessWidget {
         const SizedBox(height: 20),
 
         InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           onTap: () {
             Navigator.push(
               context,
@@ -245,10 +250,10 @@ class HomeTab extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(17),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: Colors.grey.shade200,
               ),
@@ -268,17 +273,17 @@ class HomeTab extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  size: 16,
+                  size: 15,
                 ),
               ],
             ),
           ),
         ),
 
-        const SizedBox(height: 25),
+        const SizedBox(height: 26),
 
         const Text(
-          'Categories',
+          'Explore Categories',
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.bold,
@@ -292,42 +297,42 @@ class HomeTab extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _category(
+              category(
                 context,
                 Icons.restaurant,
                 'Restaurants',
               ),
-              _category(
+              category(
                 context,
                 Icons.local_hospital,
                 'Doctors',
               ),
-              _category(
+              category(
                 context,
                 Icons.electrical_services,
-                'Electrician',
+                'Electricians',
               ),
-              _category(
+              category(
                 context,
                 Icons.plumbing,
-                'Plumber',
+                'Plumbers',
               ),
-              _category(
+              category(
                 context,
                 Icons.car_repair,
-                'Mechanic',
+                'Mechanics',
               ),
-              _category(
+              category(
                 context,
                 Icons.store,
                 'Shops',
               ),
-              _category(
+              category(
                 context,
                 Icons.school,
                 'Schools',
               ),
-              _category(
+              category(
                 context,
                 Icons.hotel,
                 'Hotels',
@@ -336,7 +341,7 @@ class HomeTab extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 25),
+        const SizedBox(height: 26),
 
         const Text(
           'Quick Access',
@@ -348,30 +353,30 @@ class HomeTab extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        _quickCard(
+        quickCard(
           context,
           Icons.search,
           'Search Businesses',
-          'Find real businesses using Google Places.',
+          'Find real businesses with Google Places.',
           const SearchPage(),
         ),
 
-        _quickCard(
+        quickCard(
           context,
           Icons.location_on,
           'Nearby',
-          'Find services around your area.',
+          'Discover businesses in any city or area.',
           const NearbyPage(),
         ),
 
-        _quickCard(
+        quickCard(
           context,
           Icons.favorite,
           'Favorites',
-          'Save businesses for quick access.',
-          const FavoritesPage(
-            favorites: [],
-            onFavorite: _emptyFavorite,
+          'Keep your favorite businesses in one place.',
+          FavoritesPage(
+            favorites: const [],
+            onFavorite: (_) {},
           ),
         ),
 
@@ -380,9 +385,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  static void _emptyFavorite(Business business) {}
-
-  Widget _category(
+  Widget category(
     BuildContext context,
     IconData icon,
     String title,
@@ -399,7 +402,7 @@ class HomeTab extends StatelessWidget {
         );
       },
       child: Container(
-        width: 100,
+        width: 105,
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -432,11 +435,11 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget _quickCard(
+  Widget quickCard(
     BuildContext context,
     IconData icon,
     String title,
-    String text,
+    String subtitle,
     Widget page,
   ) {
     return Card(
@@ -451,10 +454,10 @@ class HomeTab extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text(text),
+        subtitle: Text(subtitle),
         trailing: const Icon(
           Icons.arrow_forward_ios,
-          size: 16,
+          size: 15,
         ),
         onTap: () {
           Navigator.push(
@@ -469,9 +472,9 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   PLACES SERVICE
-============================================================ */
+// ============================================================
+// GOOGLE PLACES
+// ============================================================
 
 class PlacesService {
   static const String apiKey = String.fromEnvironment(
@@ -513,8 +516,7 @@ class PlacesService {
         if (data is Map &&
             data['error'] is Map &&
             data['error']['message'] != null) {
-          message =
-              data['error']['message'].toString();
+          message = data['error']['message'].toString();
         }
       } catch (_) {}
 
@@ -550,7 +552,8 @@ class PlacesService {
               '';
 
       final mapsUrl =
-          place['googleMapsUri']?.toString() ?? '';
+          place['googleMapsUri']?.toString() ??
+              '';
 
       final ratingValue = place['rating'];
 
@@ -590,9 +593,9 @@ class PlacesService {
   }
 }
 
-/* ============================================================
-   SEARCH
-============================================================ */
+// ============================================================
+// SEARCH PAGE
+// ============================================================
 
 class SearchPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -601,14 +604,16 @@ class SearchPage extends StatefulWidget {
   const SearchPage({
     super.key,
     this.isFavorite = _defaultFavorite,
-    this.onFavorite = _defaultOnFavorite,
+    this.onFavorite = _defaultFavoriteAction,
   });
 
   static bool _defaultFavorite(Business business) {
     return false;
   }
 
-  static void _defaultOnFavorite(Business business) {}
+  static void _defaultFavoriteAction(
+    Business business,
+  ) {}
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -639,7 +644,8 @@ class _SearchPageState extends State<SearchPage> {
     });
 
     try {
-      final data = await PlacesService.search(query);
+      final data =
+          await PlacesService.search(query);
 
       if (!mounted) return;
 
@@ -682,7 +688,8 @@ class _SearchPageState extends State<SearchPage> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: controller,
-              textInputAction: TextInputAction.search,
+              textInputAction:
+                  TextInputAction.search,
               onSubmitted: (_) => search(),
               decoration: InputDecoration(
                 hintText:
@@ -690,7 +697,8 @@ class _SearchPageState extends State<SearchPage> {
                 prefixIcon:
                     const Icon(Icons.search),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
+                  icon:
+                      const Icon(Icons.search),
                   onPressed: search,
                 ),
                 filled: true,
@@ -702,17 +710,19 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
-
           Expanded(
             child: loading
                 ? const Center(
-                    child: CircularProgressIndicator(),
+                    child:
+                        CircularProgressIndicator(),
                   )
                 : error.isNotEmpty
                     ? Center(
                         child: Padding(
                           padding:
-                              const EdgeInsets.all(25),
+                              const EdgeInsets.all(
+                            24,
+                          ),
                           child: Text(
                             error,
                             textAlign:
@@ -728,8 +738,11 @@ class _SearchPageState extends State<SearchPage> {
                           )
                         : ListView.builder(
                             padding:
-                                const EdgeInsets.all(16),
-                            itemCount: results.length,
+                                const EdgeInsets.all(
+                              16,
+                            ),
+                            itemCount:
+                                results.length,
                             itemBuilder:
                                 (context, index) {
                               final business =
@@ -755,9 +768,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-/* ============================================================
-   NEARBY
-============================================================ */
+// ============================================================
+// NEARBY
+// ============================================================
 
 class NearbyPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -765,16 +778,21 @@ class NearbyPage extends StatefulWidget {
 
   const NearbyPage({
     super.key,
-    this.isFavorite = SearchPage._defaultFavorite,
-    this.onFavorite = SearchPage._defaultOnFavorite,
+    this.isFavorite =
+        SearchPage._defaultFavorite,
+    this.onFavorite =
+        SearchPage._defaultFavoriteAction,
   });
 
   @override
-  State<NearbyPage> createState() => _NearbyPageState();
+  State<NearbyPage> createState() =>
+      _NearbyPageState();
 }
 
-class _NearbyPageState extends State<NearbyPage> {
-  final locationController = TextEditingController();
+class _NearbyPageState
+    extends State<NearbyPage> {
+  final locationController =
+      TextEditingController();
 
   List<Business> results = [];
   bool loading = false;
@@ -786,7 +804,8 @@ class _NearbyPageState extends State<NearbyPage> {
 
     if (location.isEmpty) {
       setState(() {
-        error = 'Enter a city or area first.';
+        error =
+            'Enter a city or area first.';
         results = [];
       });
       return;
@@ -799,7 +818,8 @@ class _NearbyPageState extends State<NearbyPage> {
     });
 
     try {
-      final data = await PlacesService.search(
+      final data =
+          await PlacesService.search(
         'businesses and services near $location',
       );
 
@@ -810,7 +830,8 @@ class _NearbyPageState extends State<NearbyPage> {
         loading = false;
 
         if (data.isEmpty) {
-          error = 'No businesses found nearby.';
+          error =
+              'No businesses found nearby.';
         }
       });
     } catch (e) {
@@ -836,43 +857,61 @@ class _NearbyPageState extends State<NearbyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nearby Businesses'),
+        title:
+            const Text('Nearby Businesses'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding:
+                const EdgeInsets.all(16),
             child: TextField(
-              controller: locationController,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => findNearby(),
+              controller:
+                  locationController,
+              textInputAction:
+                  TextInputAction.search,
+              onSubmitted:
+                  (_) => findNearby(),
               decoration: InputDecoration(
-                hintText: 'Enter city or area...',
+                hintText:
+                    'Enter city or area...',
                 prefixIcon:
-                    const Icon(Icons.location_on),
+                    const Icon(
+                  Icons.location_on,
+                ),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
+                  icon:
+                      const Icon(Icons.search),
                   onPressed: findNearby,
                 ),
-                border: OutlineInputBorder(
+                border:
+                    OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(16),
+                      BorderRadius.circular(
+                    16,
+                  ),
                 ),
               ),
             ),
           ),
-
           Expanded(
             child: loading
                 ? const Center(
-                    child: CircularProgressIndicator(),
+                    child:
+                        CircularProgressIndicator(),
                   )
                 : error.isNotEmpty
                     ? Center(
-                        child: Text(
-                          error,
-                          textAlign:
-                              TextAlign.center,
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.all(
+                            24,
+                          ),
+                          child: Text(
+                            error,
+                            textAlign:
+                                TextAlign.center,
+                          ),
                         ),
                       )
                     : results.isEmpty
@@ -885,8 +924,11 @@ class _NearbyPageState extends State<NearbyPage> {
                           )
                         : ListView.builder(
                             padding:
-                                const EdgeInsets.all(16),
-                            itemCount: results.length,
+                                const EdgeInsets.all(
+                              16,
+                            ),
+                            itemCount:
+                                results.length,
                             itemBuilder:
                                 (context, index) {
                               final business =
@@ -912,11 +954,12 @@ class _NearbyPageState extends State<NearbyPage> {
   }
 }
 
-/* ============================================================
-   CATEGORY SEARCH
-============================================================ */
+// ============================================================
+// CATEGORY
+// ============================================================
 
-class CategorySearchPage extends StatefulWidget {
+class CategorySearchPage
+    extends StatefulWidget {
   final String title;
 
   const CategorySearchPage({
@@ -943,8 +986,9 @@ class _CategorySearchPageState
 
   Future<void> loadCategory() async {
     try {
-      final data = await PlacesService.search(
-        '${widget.title} near Rawalpindi Pakistan',
+      final data =
+          await PlacesService.search(
+        widget.title,
       );
 
       if (!mounted) return;
@@ -978,21 +1022,31 @@ class _CategorySearchPageState
       ),
       body: loading
           ? const Center(
-              child: CircularProgressIndicator(),
+              child:
+                  CircularProgressIndicator(),
             )
           : error.isNotEmpty
               ? Center(
-                  child: Text(
-                    error,
-                    textAlign: TextAlign.center,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.all(24),
+                    child: Text(
+                      error,
+                      textAlign:
+                          TextAlign.center,
+                    ),
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
+                  padding:
+                      const EdgeInsets.all(16),
+                  itemCount:
+                      results.length,
+                  itemBuilder:
+                      (context, index) {
                     return BusinessCard(
-                      business: results[index],
+                      business:
+                          results[index],
                     );
                   },
                 ),
@@ -1000,11 +1054,12 @@ class _CategorySearchPageState
   }
 }
 
-/* ============================================================
-   BUSINESS CARD
-============================================================ */
+// ============================================================
+// BUSINESS CARD
+// ============================================================
 
-class BusinessCard extends StatelessWidget {
+class BusinessCard
+    extends StatelessWidget {
   final Business business;
   final bool isFavorite;
   final VoidCallback? onFavorite;
@@ -1019,7 +1074,8 @@ class BusinessCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin:
+          const EdgeInsets.only(bottom: 12),
       child: ListTile(
         contentPadding:
             const EdgeInsets.all(12),
@@ -1032,7 +1088,8 @@ class BusinessCard extends StatelessWidget {
         title: Text(
           business.name,
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight:
+                FontWeight.bold,
           ),
         ),
         subtitle: Column(
@@ -1045,7 +1102,8 @@ class BusinessCard extends StatelessWidget {
             Text(
               '📍 ${business.address}',
               maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              overflow:
+                  TextOverflow.ellipsis,
             ),
             const SizedBox(height: 3),
             Row(
@@ -1068,9 +1126,10 @@ class BusinessCard extends StatelessWidget {
                       ? 'Open'
                       : 'Closed',
                   style: TextStyle(
-                    color: business.openNow
-                        ? Colors.green
-                        : Colors.red,
+                    color:
+                        business.openNow
+                            ? Colors.green
+                            : Colors.red,
                     fontWeight:
                         FontWeight.w600,
                   ),
@@ -1085,8 +1144,9 @@ class BusinessCard extends StatelessWidget {
             isFavorite
                 ? Icons.favorite
                 : Icons.favorite_border,
-            color:
-                isFavorite ? Colors.red : null,
+            color: isFavorite
+                ? Colors.red
+                : null,
           ),
           onPressed: onFavorite,
         ),
@@ -1106,9 +1166,9 @@ class BusinessCard extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   BUSINESS DETAILS
-============================================================ */
+// ============================================================
+// BUSINESS PROFILE
+// ============================================================
 
 class BusinessDetailsPage
     extends StatelessWidget {
@@ -1122,7 +1182,7 @@ class BusinessDetailsPage
   Future<void> callBusiness(
     BuildContext context,
   ) async {
-    if (business.phone.isEmpty) {
+    if (business.phone.trim().isEmpty) {
       showMessage(
         context,
         'Phone number is not available.',
@@ -1130,23 +1190,40 @@ class BusinessDetailsPage
       return;
     }
 
-    final uri =
-        Uri.parse('tel:${business.phone}');
+    final uri = Uri(
+      scheme: 'tel',
+      path: business.phone.trim(),
+    );
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      showMessage(
-        context,
-        'Could not open phone dialer.',
+    try {
+      final launched =
+          await launchUrl(
+        uri,
+        mode:
+            LaunchMode.externalApplication,
       );
+
+      if (!launched &&
+          context.mounted) {
+        showMessage(
+          context,
+          'Could not open phone dialer.',
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        showMessage(
+          context,
+          'Could not open phone dialer.',
+        );
+      }
     }
   }
 
   Future<void> openWhatsApp(
     BuildContext context,
   ) async {
-    if (business.phone.isEmpty) {
+    if (business.phone.trim().isEmpty) {
       showMessage(
         context,
         'WhatsApp number is not available.',
@@ -1154,28 +1231,55 @@ class BusinessDetailsPage
       return;
     }
 
-    final phone = business.phone.replaceAll(
-      RegExp(r'[^0-9]'),
+    String phone =
+        business.phone.replaceAll(
+      RegExp(r'[^0-9+]'),
       '',
     );
 
-    final uri = Uri.parse(
-      'https://wa.me/$phone?text=${Uri.encodeComponent(
-        'Hello ${business.name}',
-      )}',
+    if (phone.startsWith('+')) {
+      phone = phone.substring(1);
+    }
+
+    if (phone.isEmpty) {
+      showMessage(
+        context,
+        'Invalid phone number.',
+      );
+      return;
+    }
+
+    final message =
+        Uri.encodeComponent(
+      'Hello ${business.name}, I found your business on Local Business & Services.',
     );
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(
+    final uri = Uri.parse(
+      'https://wa.me/$phone?text=$message',
+    );
+
+    try {
+      final launched =
+          await launchUrl(
         uri,
         mode:
             LaunchMode.externalApplication,
       );
-    } else {
-      showMessage(
-        context,
-        'WhatsApp could not be opened.',
-      );
+
+      if (!launched &&
+          context.mounted) {
+        showMessage(
+          context,
+          'WhatsApp could not be opened.',
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        showMessage(
+          context,
+          'WhatsApp could not be opened.',
+        );
+      }
     }
   }
 
@@ -1185,7 +1289,9 @@ class BusinessDetailsPage
     Uri uri;
 
     if (business.mapsUrl.isNotEmpty) {
-      uri = Uri.parse(business.mapsUrl);
+      uri = Uri.parse(
+        business.mapsUrl,
+      );
     } else {
       final query =
           Uri.encodeComponent(
@@ -1197,17 +1303,28 @@ class BusinessDetailsPage
       );
     }
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(
+    try {
+      final launched =
+          await launchUrl(
         uri,
         mode:
             LaunchMode.externalApplication,
       );
-    } else {
-      showMessage(
-        context,
-        'Google Maps could not be opened.',
-      );
+
+      if (!launched &&
+          context.mounted) {
+        showMessage(
+          context,
+          'Google Maps could not be opened.',
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        showMessage(
+          context,
+          'Google Maps could not be opened.',
+        );
+      }
     }
   }
 
@@ -1217,110 +1334,147 @@ class BusinessDetailsPage
       appBar: AppBar(
         title:
             const Text('Business Profile'),
+        centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding:
+            const EdgeInsets.all(18),
         children: [
-          const CircleAvatar(
-            radius: 55,
-            child: Icon(
-              Icons.business,
-              size: 55,
+          Container(
+            padding:
+                const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient:
+                  const LinearGradient(
+                colors: [
+                  Colors.blue,
+                  Colors.indigo,
+                ],
+              ),
+              borderRadius:
+                  BorderRadius.circular(28),
+            ),
+            child: Column(
+              children: [
+                const CircleAvatar(
+                  radius: 50,
+                  backgroundColor:
+                      Colors.white,
+                  child: Icon(
+                    Icons.storefront,
+                    size: 52,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  business.name,
+                  textAlign:
+                      TextAlign.center,
+                  style:
+                      const TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  business.category,
+                  textAlign:
+                      TextAlign.center,
+                  style:
+                      const TextStyle(
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  '⭐ ${business.rating.toStringAsFixed(1)}'
+                  ' • ${business.reviewCount} reviews',
+                  style:
+                      const TextStyle(
+                    color: Colors.white,
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 20),
 
-          Text(
-            business.name,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: profileAction(
+                  Icons.call,
+                  'Call',
+                  () =>
+                      callBusiness(context),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: profileAction(
+                  Icons.chat,
+                  'WhatsApp',
+                  () =>
+                      openWhatsApp(context),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: profileAction(
+                  Icons.map,
+                  'Maps',
+                  () =>
+                      openMaps(context),
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(height: 22),
 
-          Text(
-            business.category,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 15,
+          const Text(
+            'Business Information',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight:
+                  FontWeight.bold,
             ),
           ),
 
           const SizedBox(height: 10),
 
-          Center(
-            child: Text(
-              '⭐ ${business.rating.toStringAsFixed(1)}'
-              '  (${business.reviewCount} reviews)',
-            ),
+          profileInfo(
+            Icons.location_on,
+            'Address',
+            business.address,
           ),
 
-          const SizedBox(height: 25),
-
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceEvenly,
-            children: [
-              ActionButton(
-                icon: Icons.call,
-                title: 'Call',
-                onPressed: () =>
-                    callBusiness(context),
-              ),
-              ActionButton(
-                icon: Icons.chat,
-                title: 'WhatsApp',
-                onPressed: () =>
-                    openWhatsApp(context),
-              ),
-              ActionButton(
-                icon: Icons.map,
-                title: 'Maps',
-                onPressed: () =>
-                    openMaps(context),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 25),
-
-          InfoTile(
-            icon: Icons.location_on,
-            text: business.address,
-          ),
-
-          InfoTile(
-            icon: Icons.phone,
-            text: business.phone.isEmpty
+          profileInfo(
+            Icons.phone,
+            'Phone',
+            business.phone.isEmpty
                 ? 'Phone unavailable'
                 : business.phone,
           ),
 
-          InfoTile(
-            icon: business.openNow
+          profileInfo(
+            business.openNow
                 ? Icons.check_circle
                 : Icons.cancel,
-            text: business.openNow
+            'Status',
+            business.openNow
                 ? 'Open now'
                 : 'Currently closed',
           ),
 
-          const SizedBox(height: 25),
-
-          const Text(
-            'Reviews & Ratings',
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
 
           Card(
             child: ListTile(
@@ -1337,79 +1491,100 @@ class BusinessDetailsPage
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
-          ElevatedButton.icon(
+          OutlinedButton.icon(
             onPressed: () {
               showMessage(
                 context,
                 'Review feature will be connected in the next stage.',
               );
             },
-            icon:
-                const Icon(Icons.rate_review),
-            label:
-                const Text('Write a Review'),
+            icon: const Icon(
+              Icons.rate_review,
+            ),
+            label: const Text(
+              'Write a Review',
+            ),
           ),
+
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
-}
 
-class ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onPressed;
-
-  const ActionButton({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        IconButton.filled(
-          onPressed: onPressed,
-          icon: Icon(icon),
+  Widget profileAction(
+    IconData icon,
+    String title,
+    VoidCallback action,
+  ) {
+    return ElevatedButton(
+      onPressed: action,
+      style:
+          ElevatedButton.styleFrom(
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
         ),
-        Text(title),
-      ],
-    );
-  }
-}
-
-class InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const InfoTile({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: Colors.blue,
+        shape:
+            RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(16),
+        ),
       ),
-      title: Text(text),
+      child: Column(
+        children: [
+          Icon(icon),
+          const SizedBox(height: 5),
+          Text(title),
+        ],
+      ),
+    );
+  }
+
+  Widget profileInfo(
+    IconData icon,
+    String title,
+    String value,
+  ) {
+    return Card(
+      margin:
+          const EdgeInsets.only(
+        bottom: 10,
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: Colors.blue,
+        ),
+        title: Text(
+          title,
+          style:
+              const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+        subtitle: Text(
+          value,
+          style:
+              const TextStyle(
+            fontWeight:
+                FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 }
 
-/* ============================================================
-   FAVORITES
-============================================================ */
+// ============================================================
+// FAVORITES
+// ============================================================
 
-class FavoritesPage extends StatelessWidget {
+class FavoritesPage
+    extends StatelessWidget {
   final List<Business> favorites;
   final void Function(Business) onFavorite;
 
@@ -1424,22 +1599,28 @@ class FavoritesPage extends StatelessWidget {
     if (favorites.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(25),
+          padding:
+              EdgeInsets.all(25),
           child: Text(
             'No favorite businesses yet.\n\n'
             'Tap ❤️ on a business to save it here.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 17),
+            textAlign:
+                TextAlign.center,
+            style:
+                TextStyle(fontSize: 17),
           ),
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding:
+          const EdgeInsets.all(16),
       itemCount: favorites.length,
-      itemBuilder: (context, index) {
-        final business = favorites[index];
+      itemBuilder:
+          (context, index) {
+        final business =
+            favorites[index];
 
         return BusinessCard(
           business: business,
@@ -1452,13 +1633,15 @@ class FavoritesPage extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   ADD BUSINESS
-============================================================ */
+// ============================================================
+// ADD BUSINESS
+// ============================================================
 
 class AddBusinessPage
     extends StatefulWidget {
-  const AddBusinessPage({super.key});
+  const AddBusinessPage({
+    super.key,
+  });
 
   @override
   State<AddBusinessPage> createState() =>
@@ -1469,19 +1652,14 @@ class _AddBusinessPageState
     extends State<AddBusinessPage> {
   final nameController =
       TextEditingController();
-
   final categoryController =
       TextEditingController();
-
   final phoneController =
       TextEditingController();
-
   final addressController =
       TextEditingController();
-
   final hoursController =
       TextEditingController();
-
   final descriptionController =
       TextEditingController();
 
@@ -1498,12 +1676,18 @@ class _AddBusinessPageState
 
   void submit() {
     if (nameController.text.trim().isEmpty ||
-        categoryController.text.trim().isEmpty ||
-        phoneController.text.trim().isEmpty ||
-        addressController.text.trim().isEmpty) {
+        categoryController.text
+            .trim()
+            .isEmpty ||
+        phoneController.text
+            .trim()
+            .isEmpty ||
+        addressController.text
+            .trim()
+            .isEmpty) {
       showMessage(
         context,
-        'Please fill all required fields.',
+        'Please complete all required fields.',
       );
       return;
     }
@@ -1522,58 +1706,60 @@ class _AddBusinessPageState
             const Text('Add Your Business'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding:
+            const EdgeInsets.all(20),
         children: [
           const Text(
-            'Business Information',
+            'Create Your Business Profile',
             style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+              fontSize: 23,
+              fontWeight:
+                  FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 8),
+          const Text(
+            'Add your business information so customers can discover you.',
+            style:
+                TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 22),
 
-          const SizedBox(height: 20),
-
-          _field(
+          field(
             nameController,
             'Business Name',
             Icons.store,
           ),
-
-          _field(
+          field(
             categoryController,
-            'Category',
+            'Business Category',
             Icons.category,
           ),
-
-          _field(
+          field(
             phoneController,
             'Phone Number',
             Icons.phone,
             keyboard:
                 TextInputType.phone,
           ),
-
-          _field(
+          field(
             addressController,
-            'Location / Address',
+            'Business Address',
             Icons.location_on,
           ),
-
-          _field(
+          field(
             hoursController,
             'Opening Hours',
             Icons.access_time,
           ),
-
-          _field(
+          field(
             descriptionController,
-            'Description',
+            'Business Description',
             Icons.description,
             maxLines: 4,
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           OutlinedButton.icon(
             onPressed: () {
@@ -1585,17 +1771,20 @@ class _AddBusinessPageState
             icon:
                 const Icon(Icons.photo),
             label:
-                const Text('Add Photos'),
+                const Text('Add Business Photos'),
           ),
 
           const SizedBox(height: 15),
 
           SizedBox(
             height: 52,
-            child: ElevatedButton(
+            child: ElevatedButton.icon(
               onPressed: submit,
-              child:
-                  const Text('Submit Business'),
+              icon:
+                  const Icon(Icons.check),
+              label: const Text(
+                'Submit Business',
+              ),
             ),
           ),
         ],
@@ -1603,7 +1792,7 @@ class _AddBusinessPageState
     );
   }
 
-  Widget _field(
+  Widget field(
     TextEditingController controller,
     String label,
     IconData icon, {
@@ -1612,17 +1801,24 @@ class _AddBusinessPageState
   }) {
     return Padding(
       padding:
-          const EdgeInsets.only(bottom: 14),
+          const EdgeInsets.only(
+        bottom: 14,
+      ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboard,
-        decoration: InputDecoration(
+        decoration:
+            InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
+          prefixIcon:
+              Icon(icon),
+          border:
+              OutlineInputBorder(
             borderRadius:
-                BorderRadius.circular(12),
+                BorderRadius.circular(
+              14,
+            ),
           ),
         ),
       ),
@@ -1630,11 +1826,12 @@ class _AddBusinessPageState
   }
 }
 
-/* ============================================================
-   LOGIN
-============================================================ */
+// ============================================================
+// LOGIN
+// ============================================================
 
-class LoginPage extends StatefulWidget {
+class LoginPage
+    extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
@@ -1646,7 +1843,6 @@ class _LoginPageState
     extends State<LoginPage> {
   final emailController =
       TextEditingController();
-
   final passwordController =
       TextEditingController();
 
@@ -1658,18 +1854,21 @@ class _LoginPageState
   }
 
   void login() {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.isEmpty) {
+    if (emailController.text
+            .trim()
+            .isEmpty ||
+        passwordController.text
+            .isEmpty) {
       showMessage(
         context,
-        'Please enter email and password.',
+        'Please enter your email and password.',
       );
       return;
     }
 
     showMessage(
       context,
-      'Login system is ready for backend connection.',
+      'Login is ready for backend connection.',
     );
   }
 
@@ -1678,25 +1877,71 @@ class _LoginPageState
     return Scaffold(
       appBar: AppBar(
         title:
-            const Text('Login / Sign Up'),
+            const Text('Welcome Back'),
+        centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding:
+            const EdgeInsets.all(24),
         children: [
-          const Icon(
-            Icons.account_circle,
-            size: 100,
-          ),
-
           const SizedBox(height: 20),
 
+          Container(
+            padding:
+                const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              gradient:
+                  const LinearGradient(
+                colors: [
+                  Colors.blue,
+                  Colors.indigo,
+                ],
+              ),
+              borderRadius:
+                  BorderRadius.circular(25),
+            ),
+            child: const Column(
+              children: [
+                Icon(
+                  Icons.business_center,
+                  size: 70,
+                  color: Colors.white,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Local Business & Services',
+                  textAlign:
+                      TextAlign.center,
+                  style:
+                      TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Connect. Discover. Grow.',
+                  style:
+                      TextStyle(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
           TextField(
-            controller: emailController,
+            controller:
+                emailController,
             keyboardType:
                 TextInputType.emailAddress,
             decoration:
                 const InputDecoration(
-              labelText: 'Email',
+              labelText: 'Email Address',
               prefixIcon:
                   Icon(Icons.email),
               border:
@@ -1723,13 +1968,18 @@ class _LoginPageState
           const SizedBox(height: 20),
 
           SizedBox(
-            height: 50,
+            height: 52,
             child: ElevatedButton(
               onPressed: login,
-              child:
-                  const Text('Login'),
+              child: const Text(
+                'Login',
+                style:
+                    TextStyle(fontSize: 16),
+              ),
             ),
           ),
+
+          const SizedBox(height: 10),
 
           TextButton(
             onPressed: () {
@@ -1742,7 +1992,7 @@ class _LoginPageState
               );
             },
             child: const Text(
-              'Create New Account',
+              'Create a New Account',
             ),
           ),
         ],
@@ -1751,9 +2001,9 @@ class _LoginPageState
   }
 }
 
-/* ============================================================
-   SIGN UP
-============================================================ */
+// ============================================================
+// SIGN UP
+// ============================================================
 
 class SignupPage
     extends StatefulWidget {
@@ -1768,10 +2018,8 @@ class _SignupPageState
     extends State<SignupPage> {
   final nameController =
       TextEditingController();
-
   final emailController =
       TextEditingController();
-
   final passwordController =
       TextEditingController();
 
@@ -1784,9 +2032,14 @@ class _SignupPageState
   }
 
   void signup() {
-    if (nameController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
-        passwordController.text.isEmpty) {
+    if (nameController.text
+            .trim()
+            .isEmpty ||
+        emailController.text
+            .trim()
+            .isEmpty ||
+        passwordController.text
+            .isEmpty) {
       showMessage(
         context,
         'Please complete all fields.',
@@ -1806,12 +2059,46 @@ class _SignupPageState
       appBar: AppBar(
         title:
             const Text('Create Account'),
+        centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding:
+            const EdgeInsets.all(24),
         children: [
+          const Icon(
+            Icons.person_add_alt_1,
+            size: 90,
+            color: Colors.blue,
+          ),
+
+          const SizedBox(height: 15),
+
+          const Text(
+            'Join Local Business & Services',
+            textAlign:
+                TextAlign.center,
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'Create your account and discover businesses anywhere.',
+            textAlign:
+                TextAlign.center,
+            style:
+                TextStyle(color: Colors.grey),
+          ),
+
+          const SizedBox(height: 25),
+
           TextField(
-            controller: nameController,
+            controller:
+                nameController,
             decoration:
                 const InputDecoration(
               labelText: 'Full Name',
@@ -1825,12 +2112,13 @@ class _SignupPageState
           const SizedBox(height: 15),
 
           TextField(
-            controller: emailController,
+            controller:
+                emailController,
             keyboardType:
                 TextInputType.emailAddress,
             decoration:
                 const InputDecoration(
-              labelText: 'Email',
+              labelText: 'Email Address',
               prefixIcon:
                   Icon(Icons.email),
               border:
@@ -1857,11 +2145,11 @@ class _SignupPageState
           const SizedBox(height: 20),
 
           SizedBox(
-            height: 50,
+            height: 52,
             child: ElevatedButton(
               onPressed: signup,
               child:
-                  const Text('Sign Up'),
+                  const Text('Create Account'),
             ),
           ),
         ],
@@ -1870,9 +2158,9 @@ class _SignupPageState
   }
 }
 
-/* ============================================================
-   NOTIFICATIONS
-============================================================ */
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
 
 class NotificationsPage
     extends StatelessWidget {
@@ -1910,9 +2198,9 @@ class NotificationsPage
   }
 }
 
-/* ============================================================
-   HELPERS
-============================================================ */
+// ============================================================
+// MESSAGE HELPER
+// ============================================================
 
 void showMessage(
   BuildContext context,
