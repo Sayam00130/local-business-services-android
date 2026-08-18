@@ -27,40 +27,20 @@ jobs:
         run: |
           cp lib/main.dart app/lib/main.dart
 
-      - name: Add url_launcher
+      - name: Add packages
         working-directory: app
         run: |
           flutter pub add url_launcher
-
-      - name: Configure Android URL queries
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("app/android/app/src/main/AndroidManifest.xml")
-          text = path.read_text()
-
-          queries = """    <queries>
-              <intent>
-                  <action android:name="android.intent.action.VIEW" />
-                  <data android:scheme="tel" />
-              </intent>
-              <intent>
-                  <action android:name="android.intent.action.VIEW" />
-                  <data android:scheme="https" />
-              </intent>
-          </queries>
-          """
-
-          text = text.replace("</manifest>", queries + "</manifest>")
-          path.write_text(text)
-          PY
+          flutter pub add http
 
       - name: Build APK
         working-directory: app
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
         run: |
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release \
+            --dart-define=GOOGLE_PLACES_API_KEY="$GOOGLE_PLACES_API_KEY"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
