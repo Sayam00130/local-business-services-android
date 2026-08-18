@@ -8,9 +8,9 @@ void main() {
   runApp(const LocalBusinessServicesApp());
 }
 
-/* ============================================================
-   APP
-============================================================ */
+// ============================================================
+// APP
+// ============================================================
 
 class LocalBusinessServicesApp extends StatelessWidget {
   const LocalBusinessServicesApp({super.key});
@@ -23,16 +23,27 @@ class LocalBusinessServicesApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFFF6F8FC),
+        scaffoldBackgroundColor: const Color(0xFFF5F7FB),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
       ),
-      home: const HomePage(),
+      home: const SplashPage(),
     );
   }
 }
 
-/* ============================================================
-   BUSINESS MODEL
-============================================================ */
+// ============================================================
+// MODELS
+// ============================================================
 
 class Business {
   final String id;
@@ -41,8 +52,7 @@ class Business {
   final String address;
   final String phone;
   final String mapsUrl;
-  final String description;
-  final String openingHours;
+  final String website;
   final double rating;
   final int reviewCount;
   final bool openNow;
@@ -52,19 +62,117 @@ class Business {
     required this.name,
     required this.category,
     required this.address,
-    required this.phone,
-    required this.mapsUrl,
-    this.description = '',
-    this.openingHours = '',
+    this.phone = '',
+    this.mapsUrl = '',
+    this.website = '',
     this.rating = 0,
     this.reviewCount = 0,
     this.openNow = false,
   });
 }
 
-/* ============================================================
-   HOME
-============================================================ */
+class AppReview {
+  final String name;
+  final double rating;
+  final String comment;
+  final String date;
+
+  const AppReview({
+    required this.name,
+    required this.rating,
+    required this.comment,
+    required this.date,
+  });
+}
+
+// ============================================================
+// SPLASH
+// ============================================================
+
+class SplashPage extends StatefulWidget {
+  const SplashPage({super.key});
+
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const HomePage(),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue,
+              Colors.indigo,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 48,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.business,
+                  size: 55,
+                  color: Colors.blue,
+                ),
+              ),
+              SizedBox(height: 22),
+              Text(
+                'Local Business\n& Services',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Discover businesses around the world',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 35),
+              CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// APP SHELL
+// ============================================================
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -125,25 +233,18 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Notifications',
-            icon: const Icon(
-              Icons.notifications_outlined,
-            ),
+            icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      const NotificationsPage(),
+                  builder: (_) => const NotificationsPage(),
                 ),
               );
             },
           ),
           IconButton(
-            tooltip: 'Account',
-            icon: const Icon(
-              Icons.person_outline,
-            ),
+            icon: const Icon(Icons.person_outline),
             onPressed: () {
               Navigator.push(
                 context,
@@ -202,9 +303,9 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/* ============================================================
-   HOME TAB
-============================================================ */
+// ============================================================
+// HOME TAB
+// ============================================================
 
 class HomeTab extends StatelessWidget {
   final bool Function(Business) isFavorite;
@@ -219,7 +320,7 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       children: [
         Container(
           padding: const EdgeInsets.all(24),
@@ -230,27 +331,26 @@ class HomeTab extends StatelessWidget {
                 Colors.indigo,
               ],
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(26),
           ),
           child: const Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Discover Local Businesses',
+                'Find What You Need',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 10),
               Text(
-                'Find businesses, services, shops, restaurants and more around the world.',
+                'Discover businesses and professional services anywhere in the world.',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 15,
-                  height: 1.4,
+                  height: 1.5,
                 ),
               ),
             ],
@@ -259,8 +359,7 @@ class HomeTab extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        InkWell(
-          borderRadius: BorderRadius.circular(18),
+        GestureDetector(
           onTap: () {
             Navigator.push(
               context,
@@ -287,14 +386,10 @@ class HomeTab extends StatelessWidget {
                     'Search businesses or services...',
                     style: TextStyle(
                       color: Colors.grey,
-                      fontSize: 15,
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                ),
+                Icon(Icons.arrow_forward_ios, size: 15),
               ],
             ),
           ),
@@ -310,55 +405,25 @@ class HomeTab extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
 
-        SizedBox(
-          height: 112,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              categoryItem(
-                context,
-                Icons.restaurant,
-                'Restaurants',
-              ),
-              categoryItem(
-                context,
-                Icons.local_hospital,
-                'Healthcare',
-              ),
-              categoryItem(
-                context,
-                Icons.electrical_services,
-                'Electricians',
-              ),
-              categoryItem(
-                context,
-                Icons.plumbing,
-                'Plumbers',
-              ),
-              categoryItem(
-                context,
-                Icons.car_repair,
-                'Mechanics',
-              ),
-              categoryItem(
-                context,
-                Icons.store,
-                'Shops',
-              ),
-              categoryItem(
-                context,
-                Icons.school,
-                'Schools',
-              ),
-              categoryItem(
-                context,
-                Icons.hotel,
-                'Hotels',
-              ),
-            ],
-          ),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: .85,
+          children: [
+            categoryItem(context, Icons.restaurant, 'Restaurants'),
+            categoryItem(context, Icons.local_hospital, 'Healthcare'),
+            categoryItem(context, Icons.electrical_services, 'Electricians'),
+            categoryItem(context, Icons.plumbing, 'Plumbers'),
+            categoryItem(context, Icons.car_repair, 'Mechanics'),
+            categoryItem(context, Icons.store, 'Shops'),
+            categoryItem(context, Icons.school, 'Schools'),
+            categoryItem(context, Icons.hotel, 'Hotels'),
+          ],
         ),
 
         const SizedBox(height: 28),
@@ -377,7 +442,7 @@ class HomeTab extends StatelessWidget {
           context,
           Icons.search,
           'Search Businesses',
-          'Find real businesses using Google Places.',
+          'Find businesses and services worldwide.',
           const SearchPage(),
         ),
 
@@ -385,7 +450,7 @@ class HomeTab extends StatelessWidget {
           context,
           Icons.location_on,
           'Nearby Businesses',
-          'Search businesses around your city or area.',
+          'Discover businesses around your area.',
           const NearbyPage(),
         ),
 
@@ -393,11 +458,9 @@ class HomeTab extends StatelessWidget {
           context,
           Icons.add_business,
           'List Your Business',
-          'Create a professional business profile.',
+          'Add your business to the platform.',
           const AddBusinessPage(),
         ),
-
-        const SizedBox(height: 100),
       ],
     );
   }
@@ -407,20 +470,20 @@ class HomeTab extends StatelessWidget {
     IconData icon,
     String title,
   ) {
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                CategorySearchPage(title: title),
+            builder: (_) => CategorySearchPage(
+              title: title,
+            ),
           ),
         );
       },
       child: Container(
-        width: 105,
-        margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -429,20 +492,20 @@ class HomeTab extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              size: 32,
               color: Colors.blue,
+              size: 30,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 7),
             Text(
               title,
               textAlign: TextAlign.center,
+              maxLines: 2,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -462,6 +525,7 @@ class HomeTab extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
+        contentPadding: const EdgeInsets.all(8),
         leading: CircleAvatar(
           child: Icon(icon),
         ),
@@ -474,7 +538,7 @@ class HomeTab extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: const Icon(
           Icons.arrow_forward_ios,
-          size: 16,
+          size: 15,
         ),
         onTap: () {
           Navigator.push(
@@ -489,9 +553,9 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-/* ============================================================
-   GOOGLE PLACES SERVICE
-============================================================ */
+// ============================================================
+// GOOGLE PLACES
+// ============================================================
 
 class PlacesService {
   static const String apiKey =
@@ -516,7 +580,7 @@ class PlacesService {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': apiKey,
         'X-Goog-FieldMask':
-            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
+            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.googleMapsUri,places.websiteUri,places.currentOpeningHours',
       },
       body: jsonEncode({
         'textQuery': query,
@@ -534,8 +598,7 @@ class PlacesService {
         if (data is Map &&
             data['error'] is Map &&
             data['error']['message'] != null) {
-          message =
-              data['error']['message'].toString();
+          message = data['error']['message'].toString();
         }
       } catch (_) {}
 
@@ -550,65 +613,53 @@ class PlacesService {
     }
 
     return places.map<Business>((place) {
-      final displayName =
-          place['displayName'];
+      final displayName = place['displayName'];
 
       final name = displayName is Map
-          ? (displayName['text'] ??
-                  'Unknown Business')
-              .toString()
+          ? (displayName['text'] ?? 'Unknown Business').toString()
           : 'Unknown Business';
 
       final category =
-          (place['primaryType'] ??
-                  'Business')
+          (place['primaryType'] ?? 'Business')
               .toString()
               .replaceAll('_', ' ');
 
       final address =
-          place['formattedAddress']
-                  ?.toString() ??
+          place['formattedAddress']?.toString() ??
               'Address unavailable';
 
-      // International phone number preferred.
-      final internationalPhone =
-          place['internationalPhoneNumber']
-              ?.toString();
+      final international =
+          place['internationalPhoneNumber']?.toString();
 
-      final nationalPhone =
-          place['nationalPhoneNumber']
-              ?.toString();
+      final national =
+          place['nationalPhoneNumber']?.toString();
 
       final phone =
-          (internationalPhone != null &&
-                  internationalPhone.isNotEmpty)
-              ? internationalPhone
-              : (nationalPhone ?? '');
+          international != null && international.isNotEmpty
+              ? international
+              : (national ?? '');
 
       final mapsUrl =
-          place['googleMapsUri']
-                  ?.toString() ??
-              '';
+          place['googleMapsUri']?.toString() ?? '';
 
-      final ratingValue =
-          place['rating'];
+      final website =
+          place['websiteUri']?.toString() ?? '';
+
+      final ratingValue = place['rating'];
 
       final rating = ratingValue is num
           ? ratingValue.toDouble()
           : 0.0;
 
-      final reviewValue =
-          place['userRatingCount'];
+      final reviewValue = place['userRatingCount'];
 
-      final reviewCount =
-          reviewValue is num
-              ? reviewValue.toInt()
-              : 0;
+      final reviewCount = reviewValue is num
+          ? reviewValue.toInt()
+          : 0;
 
       bool openNow = false;
 
-      final opening =
-          place['currentOpeningHours'];
+      final opening = place['currentOpeningHours'];
 
       if (opening is Map &&
           opening['openNow'] is bool) {
@@ -616,13 +667,13 @@ class PlacesService {
       }
 
       return Business(
-        id: place['id']?.toString() ??
-            name,
+        id: place['id']?.toString() ?? name,
         name: name,
         category: category,
         address: address,
         phone: phone,
         mapsUrl: mapsUrl,
+        website: website,
         rating: rating,
         reviewCount: reviewCount,
         openNow: openNow,
@@ -631,9 +682,9 @@ class PlacesService {
   }
 }
 
-/* ============================================================
-   SEARCH PAGE
-============================================================ */
+// ============================================================
+// SEARCH PAGE
+// ============================================================
 
 class SearchPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -645,33 +696,23 @@ class SearchPage extends StatefulWidget {
     this.onFavorite = _defaultFavoriteAction,
   });
 
-  static bool _defaultFavorite(
-    Business business,
-  ) {
-    return false;
-  }
+  static bool _defaultFavorite(Business business) => false;
 
-  static void _defaultFavoriteAction(
-    Business business,
-  ) {}
+  static void _defaultFavoriteAction(Business business) {}
 
   @override
-  State<SearchPage> createState() =>
-      _SearchPageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState
-    extends State<SearchPage> {
-  final controller =
-      TextEditingController();
+class _SearchPageState extends State<SearchPage> {
+  final controller = TextEditingController();
 
   List<Business> results = [];
   bool loading = false;
   String error = '';
 
   Future<void> search() async {
-    final query =
-        controller.text.trim();
+    final query = controller.text.trim();
 
     if (query.isEmpty) {
       setState(() {
@@ -688,8 +729,7 @@ class _SearchPageState
     });
 
     try {
-      final data =
-          await PlacesService.search(query);
+      final data = await PlacesService.search(query);
 
       if (!mounted) return;
 
@@ -724,36 +764,22 @@ class _SearchPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Search Businesses'),
+        title: const Text('Search Businesses'),
       ),
       body: Column(
         children: [
           Padding(
-            padding:
-                const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: controller,
-              textInputAction:
-                  TextInputAction.search,
+              textInputAction: TextInputAction.search,
               onSubmitted: (_) => search(),
               decoration: InputDecoration(
-                hintText:
-                    'Business, service or location...',
-                prefixIcon:
-                    const Icon(Icons.search),
-                suffixIcon:
-                    IconButton(
-                  icon:
-                      const Icon(Icons.search),
+                hintText: 'Business, service or city...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
                   onPressed: search,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(16),
                 ),
               ),
             ),
@@ -761,20 +787,15 @@ class _SearchPageState
           Expanded(
             child: loading
                 ? const Center(
-                    child:
-                        CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   )
                 : error.isNotEmpty
                     ? Center(
                         child: Padding(
-                          padding:
-                              const EdgeInsets.all(
-                            25,
-                          ),
+                          padding: const EdgeInsets.all(24),
                           child: Text(
                             error,
-                            textAlign:
-                                TextAlign.center,
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       )
@@ -785,29 +806,23 @@ class _SearchPageState
                             ),
                           )
                         : ListView.builder(
-                            padding:
-                                const EdgeInsets.all(
+                            padding: const EdgeInsets.fromLTRB(
                               16,
+                              0,
+                              16,
+                              100,
                             ),
-                            itemCount:
-                                results.length,
-                            itemBuilder:
-                                (context, index) {
-                              final business =
-                                  results[index];
+                            itemCount: results.length,
+                            itemBuilder: (_, index) {
+                              final business = results[index];
 
                               return BusinessCard(
-                                business:
-                                    business,
-                                isFavorite:
-                                    widget.isFavorite(
-                                  business,
-                                ),
-                                onFavorite:
-                                    () => widget
-                                        .onFavorite(
-                                  business,
-                                ),
+                                business: business,
+                                favorite: widget.isFavorite(business),
+                                onFavorite: () {
+                                  widget.onFavorite(business);
+                                  setState(() {});
+                                },
                               );
                             },
                           ),
@@ -818,200 +833,11 @@ class _SearchPageState
   }
 }
 
-/* ============================================================
-   NEARBY PAGE
-============================================================ */
+// ============================================================
+// CATEGORY SEARCH
+// ============================================================
 
-class NearbyPage extends StatefulWidget {
-  final bool Function(Business) isFavorite;
-  final void Function(Business) onFavorite;
-
-  const NearbyPage({
-    super.key,
-    this.isFavorite =
-        SearchPage._defaultFavorite,
-    this.onFavorite =
-        SearchPage._defaultFavoriteAction,
-  });
-
-  @override
-  State<NearbyPage> createState() =>
-      _NearbyPageState();
-}
-
-class _NearbyPageState
-    extends State<NearbyPage> {
-  final locationController =
-      TextEditingController();
-
-  List<Business> results = [];
-  bool loading = false;
-  String error = '';
-
-  Future<void> findNearby() async {
-    final location =
-        locationController.text.trim();
-
-    if (location.isEmpty) {
-      setState(() {
-        error =
-            'Enter a city or area first.';
-        results = [];
-      });
-      return;
-    }
-
-    setState(() {
-      loading = true;
-      error = '';
-      results = [];
-    });
-
-    try {
-      final data =
-          await PlacesService.search(
-        'businesses and services near $location',
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        results = data;
-        loading = false;
-
-        if (data.isEmpty) {
-          error =
-              'No businesses found nearby.';
-        }
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        loading = false;
-        error = e.toString().replaceFirst(
-              'Exception: ',
-              '',
-            );
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    locationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title:
-            const Text('Nearby Businesses'),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding:
-                const EdgeInsets.all(16),
-            child: TextField(
-              controller:
-                  locationController,
-              textInputAction:
-                  TextInputAction.search,
-              onSubmitted: (_) =>
-                  findNearby(),
-              decoration: InputDecoration(
-                hintText:
-                    'Enter city or area...',
-                prefixIcon: const Icon(
-                  Icons.location_on,
-                ),
-                suffixIcon:
-                    IconButton(
-                  icon: const Icon(
-                    Icons.search,
-                  ),
-                  onPressed:
-                      findNearby,
-                ),
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: loading
-                ? const Center(
-                    child:
-                        CircularProgressIndicator(),
-                  )
-                : error.isNotEmpty
-                    ? Center(
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.all(
-                            20,
-                          ),
-                          child: Text(
-                            error,
-                            textAlign:
-                                TextAlign.center,
-                          ),
-                        ),
-                      )
-                    : results.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'Enter an area to find nearby businesses.',
-                              textAlign:
-                                  TextAlign.center,
-                            ),
-                          )
-                        : ListView.builder(
-                            padding:
-                                const EdgeInsets.all(
-                              16,
-                            ),
-                            itemCount:
-                                results.length,
-                            itemBuilder:
-                                (context, index) {
-                              final business =
-                                  results[index];
-
-                              return BusinessCard(
-                                business:
-                                    business,
-                                isFavorite:
-                                    widget.isFavorite(
-                                  business,
-                                ),
-                                onFavorite:
-                                    () => widget
-                                        .onFavorite(
-                                  business,
-                                ),
-                              );
-                            },
-                          ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   CATEGORY SEARCH
-============================================================ */
-
-class CategorySearchPage
-    extends StatefulWidget {
+class CategorySearchPage extends StatefulWidget {
   final String title;
 
   const CategorySearchPage({
@@ -1020,39 +846,33 @@ class CategorySearchPage
   });
 
   @override
-  State<CategorySearchPage>
-      createState() =>
-          _CategorySearchPageState();
+  State<CategorySearchPage> createState() =>
+      _CategorySearchPageState();
 }
 
 class _CategorySearchPageState
     extends State<CategorySearchPage> {
-  List<Business> results = [];
   bool loading = true;
   String error = '';
+  List<Business> businesses = [];
 
   @override
   void initState() {
     super.initState();
-    loadCategory();
+    load();
   }
 
-  Future<void> loadCategory() async {
+  Future<void> load() async {
     try {
-      final data =
-          await PlacesService.search(
-        widget.title,
+      final data = await PlacesService.search(
+        '${widget.title} near me',
       );
 
       if (!mounted) return;
 
       setState(() {
-        results = data;
+        businesses = data;
         loading = false;
-
-        if (data.isEmpty) {
-          error = 'No businesses found.';
-        }
       });
     } catch (e) {
       if (!mounted) return;
@@ -1075,41 +895,28 @@ class _CategorySearchPageState
       ),
       body: loading
           ? const Center(
-              child:
-                  CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             )
           : error.isNotEmpty
               ? Center(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.all(
-                      20,
-                    ),
+                    padding: const EdgeInsets.all(24),
                     child: Text(
                       error,
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 )
-              : results.isEmpty
+              : businesses.isEmpty
                   ? const Center(
-                      child: Text(
-                        'No businesses found.',
-                      ),
+                      child: Text('No businesses found.'),
                     )
                   : ListView.builder(
-                      padding:
-                          const EdgeInsets.all(
-                        16,
-                      ),
-                      itemCount:
-                          results.length,
-                      itemBuilder:
-                          (context, index) {
+                      padding: const EdgeInsets.all(16),
+                      itemCount: businesses.length,
+                      itemBuilder: (_, index) {
                         return BusinessCard(
-                          business:
-                              results[index],
+                          business: businesses[index],
                         );
                       },
                     ),
@@ -1117,124 +924,302 @@ class _CategorySearchPageState
   }
 }
 
-/* ============================================================
-   BUSINESS CARD
-============================================================ */
+// ============================================================
+// NEARBY
+// ============================================================
 
-class BusinessCard
-    extends StatelessWidget {
+class NearbyPage extends StatefulWidget {
+  final bool Function(Business) isFavorite;
+  final void Function(Business) onFavorite;
+
+  const NearbyPage({
+    super.key,
+    this.isFavorite = SearchPage._defaultFavorite,
+    this.onFavorite = SearchPage._defaultFavoriteAction,
+  });
+
+  @override
+  State<NearbyPage> createState() => _NearbyPageState();
+}
+
+class _NearbyPageState extends State<NearbyPage> {
+  final controller = TextEditingController();
+
+  bool loading = false;
+  String error = '';
+  List<Business> businesses = [];
+
+  Future<void> searchNearby() async {
+    final location = controller.text.trim();
+
+    if (location.isEmpty) {
+      setState(() {
+        error = 'Enter a city, area or location.';
+      });
+      return;
+    }
+
+    setState(() {
+      loading = true;
+      error = '';
+      businesses = [];
+    });
+
+    try {
+      final data = await PlacesService.search(
+        'businesses in $location',
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        businesses = data;
+        loading = false;
+
+        if (data.isEmpty) {
+          error = 'No businesses found.';
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        loading = false;
+        error = e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Nearby Businesses'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: controller,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => searchNearby(),
+              decoration: InputDecoration(
+                hintText: 'Enter city or area',
+                prefixIcon: const Icon(Icons.location_on),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: searchNearby,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: loading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : error.isNotEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            error,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : businesses.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'Enter a city or area to find businesses.',
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(
+                              16,
+                              0,
+                              16,
+                              100,
+                            ),
+                            itemCount: businesses.length,
+                            itemBuilder: (_, index) {
+                              final business =
+                                  businesses[index];
+
+                              return BusinessCard(
+                                business: business,
+                                favorite:
+                                    widget.isFavorite(business),
+                                onFavorite: () {
+                                  widget.onFavorite(business);
+                                  setState(() {});
+                                },
+                              );
+                            },
+                          ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// BUSINESS CARD
+// ============================================================
+
+class BusinessCard extends StatelessWidget {
   final Business business;
-  final bool isFavorite;
+  final bool favorite;
   final VoidCallback? onFavorite;
 
   const BusinessCard({
     super.key,
     required this.business,
-    this.isFavorite = false,
+    this.favorite = false,
     this.onFavorite,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin:
-          const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.all(12),
-        leading: CircleAvatar(
-          radius: 28,
-          child: const Icon(
-            Icons.business,
-          ),
-        ),
-        title: Text(
-          business.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 5),
-            Text(
-              business.category,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              business.address,
-              maxLines: 2,
-              overflow:
-                  TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(
-                  Icons.star,
-                  size: 16,
-                  color: Colors.amber,
-                ),
-                Text(
-                  ' ${business.rating.toStringAsFixed(1)}',
-                ),
-                if (business.reviewCount >
-                    0)
-                  Text(
-                    ' (${business.reviewCount})',
-                  ),
-                const SizedBox(width: 8),
-                Text(
-                  business.openNow
-                      ? 'Open'
-                      : 'Closed',
-                  style: TextStyle(
-                    color: business.openNow
-                        ? Colors.green
-                        : Colors.red,
-                    fontWeight:
-                        FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        trailing: IconButton(
-          icon: Icon(
-            isFavorite
-                ? Icons.favorite
-                : Icons.favorite_border,
-            color: isFavorite
-                ? Colors.red
-                : null,
-          ),
-          onPressed: onFavorite,
-        ),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) =>
-                  BusinessDetailsPage(
+              builder: (_) => BusinessDetailsPage(
                 business: business,
               ),
             ),
           );
         },
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 27,
+                    child: Text(
+                      business.name.isNotEmpty
+                          ? business.name[0].toUpperCase()
+                          : 'B',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      business.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: onFavorite,
+                    icon: Icon(
+                      favorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: favorite ? Colors.red : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                business.category,
+                style: TextStyle(
+                  color: Colors.blue.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.star,
+                    size: 18,
+                    color: Colors.amber,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    business.rating > 0
+                        ? business.rating.toStringAsFixed(1)
+                        : 'No rating',
+                  ),
+                  if (business.reviewCount > 0)
+                    Text(
+                      ' (${business.reviewCount})',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  const Spacer(),
+                  if (business.openNow)
+                    const Text(
+                      'Open',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              Row(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      business.address,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-/* ============================================================
-   BUSINESS DETAILS
-============================================================ */
+// ============================================================
+// BUSINESS DETAILS
+// ============================================================
 
-class BusinessDetailsPage
-    extends StatelessWidget {
+class BusinessDetailsPage extends StatelessWidget {
   final Business business;
 
   const BusinessDetailsPage({
@@ -1242,308 +1227,286 @@ class BusinessDetailsPage
     required this.business,
   });
 
+  Future<void> openUrl(
+    BuildContext context,
+    String url,
+  ) async {
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This information is not available.'),
+        ),
+      );
+      return;
+    }
+
+    final uri = Uri.tryParse(url);
+
+    if (uri == null) return;
+
+    try {
+      await launchUrl(uri);
+    } catch (_) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open the link.'),
+        ),
+      );
+    }
+  }
+
   Future<void> callBusiness(
     BuildContext context,
   ) async {
     if (business.phone.isEmpty) {
-      showMessage(
-        context,
-        'Phone number is not available.',
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone number is not available.'),
+        ),
       );
       return;
     }
 
-    final uri =
-        Uri.parse('tel:${business.phone}');
+    final cleaned =
+        business.phone.replaceAll(RegExp(r'[^\d+]'), '');
 
-    try {
-      final launched =
-          await launchUrl(uri);
-
-      if (!launched) {
-        showMessage(
-          context,
-          'Could not open phone dialer.',
-        );
-      }
-    } catch (_) {
-      showMessage(
-        context,
-        'Could not open phone dialer.',
-      );
-    }
+    await openUrl(
+      context,
+      'tel:$cleaned',
+    );
   }
 
-  Future<void> openWhatsApp(
+  Future<void> whatsapp(
     BuildContext context,
   ) async {
     if (business.phone.isEmpty) {
-      showMessage(
-        context,
-        'WhatsApp number is not available.',
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('WhatsApp number is not available.'),
+        ),
       );
       return;
     }
 
-    final phone =
-        business.phone.replaceAll(
-      RegExp(r'[^0-9]'),
-      '',
+    final number =
+        business.phone.replaceAll(RegExp(r'[^\d]'), '');
+
+    await openUrl(
+      context,
+      'https://wa.me/$number',
     );
-
-    if (phone.isEmpty) {
-      showMessage(
-        context,
-        'Invalid international phone number.',
-      );
-      return;
-    }
-
-    final uri = Uri.parse(
-      'https://wa.me/$phone?text=${Uri.encodeComponent(
-        'Hello ${business.name}',
-      )}',
-    );
-
-    try {
-      final launched =
-          await launchUrl(
-        uri,
-        mode:
-            LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        showMessage(
-          context,
-          'WhatsApp could not be opened.',
-        );
-      }
-    } catch (_) {
-      showMessage(
-        context,
-        'WhatsApp could not be opened.',
-      );
-    }
-  }
-
-  Future<void> openMaps(
-    BuildContext context,
-  ) async {
-    Uri uri;
-
-    if (business.mapsUrl.isNotEmpty) {
-      uri = Uri.parse(
-        business.mapsUrl,
-      );
-    } else {
-      final query =
-          Uri.encodeComponent(
-        '${business.name}, ${business.address}',
-      );
-
-      uri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=$query',
-      );
-    }
-
-    try {
-      final launched =
-          await launchUrl(
-        uri,
-        mode:
-            LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        showMessage(
-          context,
-          'Google Maps could not be opened.',
-        );
-      }
-    } catch (_) {
-      showMessage(
-        context,
-        'Google Maps could not be opened.',
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Business Profile'),
+        title: const Text('Business Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Sharing will be connected in the next release.',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          30,
+        ),
         children: [
           Container(
-            padding:
-                const EdgeInsets.all(22),
+            height: 150,
             decoration: BoxDecoration(
-              gradient:
-                  const LinearGradient(
+              gradient: const LinearGradient(
                 colors: [
                   Colors.blue,
                   Colors.indigo,
                 ],
               ),
-              borderRadius:
-                  BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24),
             ),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 48,
-                  backgroundColor:
-                      Colors.white,
-                  child: Icon(
-                    Icons.business,
-                    size: 50,
+            child: Center(
+              child: CircleAvatar(
+                radius: 45,
+                backgroundColor: Colors.white,
+                child: Text(
+                  business.name.isNotEmpty
+                      ? business.name[0].toUpperCase()
+                      : 'B',
+                  style: const TextStyle(
+                    fontSize: 38,
+                    fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  business.name,
-                  textAlign:
-                      TextAlign.center,
-                  style:
-                      const TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  business.category,
-                  textAlign:
-                      TextAlign.center,
-                  style:
-                      const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
+
+          Text(
+            business.name,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 7),
+
+          Text(
+            business.category,
+            style: TextStyle(
+              color: Colors.blue.shade700,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(height: 12),
 
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceEvenly,
             children: [
-              ActionButton(
-                icon: Icons.call,
-                title: 'Call',
-                onPressed: () =>
-                    callBusiness(
-                  context,
+              const Icon(
+                Icons.star,
+                color: Colors.amber,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                business.rating > 0
+                    ? business.rating.toStringAsFixed(1)
+                    : 'No rating',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              ActionButton(
-                icon: Icons.chat,
-                title: 'WhatsApp',
-                onPressed: () =>
-                    openWhatsApp(
-                  context,
+              const SizedBox(width: 8),
+              if (business.reviewCount > 0)
+                Text(
+                  '${business.reviewCount} reviews',
+                  style: const TextStyle(
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
-              ActionButton(
-                icon: Icons.map,
-                title: 'Maps',
-                onPressed: () =>
-                    openMaps(
-                  context,
+              const Spacer(),
+              if (business.openNow)
+                const Text(
+                  'OPEN NOW',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
             ],
           ),
 
           const SizedBox(height: 20),
 
-          Card(
-            child: Padding(
-              padding:
-                  const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  infoRow(
-                    Icons.location_on,
-                    'Address',
-                    business.address,
-                  ),
-                  infoRow(
-                    Icons.phone,
-                    'Phone',
-                    business.phone.isEmpty
-                        ? 'Not available'
-                        : business.phone,
-                  ),
-                  infoRow(
-                    Icons.access_time,
-                    'Opening Hours',
-                    business.openingHours.isEmpty
-                        ? 'Not provided'
-                        : business.openingHours,
-                  ),
-                  infoRow(
-                    business.openNow
-                        ? Icons.check_circle
-                        : Icons.info_outline,
-                    'Status',
-                    business.openNow
-                        ? 'Open now'
-                        : 'Currently closed',
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          if (business.description
-              .trim()
-              .isNotEmpty) ...[
-            const SizedBox(height: 20),
-            const Text(
-              'About This Business',
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight:
-                    FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Card(
-              child: Padding(
-                padding:
-                    const EdgeInsets.all(16),
-                child: Text(
-                  business.description,
-                  style:
-                      const TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                  ),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => callBusiness(context),
+                  icon: const Icon(Icons.call),
+                  label: const Text('Call'),
                 ),
               ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => whatsapp(context),
+                  icon: const Icon(Icons.chat),
+                  label: const Text('WhatsApp'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          OutlinedButton.icon(
+            onPressed: () => openUrl(
+              context,
+              business.mapsUrl,
+            ),
+            icon: const Icon(Icons.map),
+            label: const Text('Open in Google Maps'),
+          ),
+
+          if (business.website.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => openUrl(
+                context,
+                business.website,
+              ),
+              icon: const Icon(Icons.language),
+              label: const Text('Open Website'),
             ),
           ],
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
-          const Text(
-            'Ratings & Reviews',
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
+          infoCard(
+            Icons.location_on,
+            'Address',
+            business.address,
+          ),
+
+          if (business.phone.isNotEmpty)
+            infoCard(
+              Icons.phone,
+              'Phone',
+              business.phone,
+            ),
+
+          const SizedBox(height: 10),
+
+          Card(
+            child: ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.star),
+              ),
+              title: const Text(
+                'Ratings & Reviews',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                business.reviewCount > 0
+                    ? '${business.reviewCount} reviews available'
+                    : 'Be the first to review',
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 15,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReviewsPage(
+                      business: business,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -1551,87 +1514,228 @@ class BusinessDetailsPage
 
           Card(
             child: ListTile(
-              leading:
-                  const CircleAvatar(
-                child: Icon(Icons.star),
+              leading: const CircleAvatar(
+                child: Icon(Icons.rate_review),
               ),
-              title: Text(
-                '${business.rating.toStringAsFixed(1)} Rating',
+              title: const Text(
+                'Write a Review',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              subtitle: Text(
-                '${business.reviewCount} customer ratings',
+              subtitle: const Text(
+                'Share your experience',
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 15,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WriteReviewPage(
+                      business: business,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget infoCard(
+    IconData icon,
+    String title,
+    String value,
+  ) {
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          child: Icon(icon),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(value),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// REVIEWS
+// ============================================================
+
+class ReviewsPage extends StatefulWidget {
+  final Business business;
+
+  const ReviewsPage({
+    super.key,
+    required this.business,
+  });
+
+  @override
+  State<ReviewsPage> createState() => _ReviewsPageState();
+}
+
+class _ReviewsPageState extends State<ReviewsPage> {
+  final List<AppReview> reviews = [
+    AppReview(
+      name: 'Verified User',
+      rating: 5,
+      comment: 'Great experience and professional service.',
+      date: 'Recently',
+    ),
+    AppReview(
+      name: 'Local Customer',
+      rating: 4,
+      comment: 'Good service and friendly staff.',
+      date: 'Recently',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final rating = widget.business.rating;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ratings & Reviews'),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WriteReviewPage(
+                business: widget.business,
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.rate_review),
+        label: const Text('Write Review'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          100,
+        ),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                children: [
+                  Text(
+                    rating > 0
+                        ? rating.toStringAsFixed(1)
+                        : '0.0',
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center,
+                    children: List.generate(
+                      5,
+                      (index) => Icon(
+                        index < rating.round()
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: Colors.amber,
+                        size: 27,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${widget.business.reviewCount} total reviews',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
 
           const SizedBox(height: 16),
 
-          SizedBox(
-            height: 50,
-            child:
-                OutlinedButton.icon(
-              onPressed: () {
-                showMessage(
-                  context,
-                  'Review feature will be connected to the backend in the next stage.',
-                );
-              },
-              icon: const Icon(
-                Icons.rate_review,
-              ),
-              label: const Text(
-                'Write a Review',
-              ),
+          const Text(
+            'Customer Reviews',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
-    );
-  }
 
-  Widget infoRow(
-    IconData icon,
-    String title,
-    String value,
-  ) {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        vertical: 9,
-      ),
-      child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: Colors.blue,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style:
-                      const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+          const SizedBox(height: 12),
+
+          ...reviews.map(
+            (review) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            review.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          review.date,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(
+                        5,
+                        (index) => Icon(
+                          index < review.rating
+                              ? Icons.star
+                              : Icons.star_border,
+                          size: 19,
+                          color: Colors.amber,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(review.comment),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  value,
-                  style:
-                      const TextStyle(
-                    fontSize: 15,
-                    fontWeight:
-                        FontWeight.w500,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -1640,44 +1744,146 @@ class BusinessDetailsPage
   }
 }
 
-/* ============================================================
-   ACTION BUTTON
-============================================================ */
+// ============================================================
+// WRITE REVIEW
+// ============================================================
 
-class ActionButton
-    extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onPressed;
+class WriteReviewPage extends StatefulWidget {
+  final Business business;
 
-  const ActionButton({
+  const WriteReviewPage({
     super.key,
-    required this.icon,
-    required this.title,
-    required this.onPressed,
+    required this.business,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        IconButton.filled(
-          onPressed: onPressed,
-          icon: Icon(icon),
+  State<WriteReviewPage> createState() =>
+      _WriteReviewPageState();
+}
+
+class _WriteReviewPageState
+    extends State<WriteReviewPage> {
+  double rating = 5;
+  final reviewController = TextEditingController();
+
+  @override
+  void dispose() {
+    reviewController.dispose();
+    super.dispose();
+  }
+
+  void submit() {
+    if (reviewController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please write your review.'),
         ),
-        const SizedBox(height: 4),
-        Text(title),
-      ],
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Review Submitted'),
+        content: const Text(
+          'Your review has been prepared successfully. '
+          'Permanent review storage will be connected with the backend/database later.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Write a Review'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text(
+            widget.business.name,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          const Center(
+            child: Text(
+              'Your Rating',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              5,
+              (index) => IconButton(
+                onPressed: () {
+                  setState(() {
+                    rating = index + 1.0;
+                  });
+                },
+                icon: Icon(
+                  index < rating
+                      ? Icons.star
+                      : Icons.star_border,
+                  color: Colors.amber,
+                  size: 42,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          TextField(
+            controller: reviewController,
+            maxLines: 7,
+            decoration: const InputDecoration(
+              hintText: 'Write your experience...',
+              alignLabelWithHint: true,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          FilledButton.icon(
+            onPressed: submit,
+            icon: const Icon(Icons.send),
+            label: const Text('Submit Review'),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/* ============================================================
-   FAVORITES
-============================================================ */
+// ============================================================
+// FAVORITES
+// ============================================================
 
-class FavoritesPage
-    extends StatelessWidget {
+class FavoritesPage extends StatelessWidget {
   final List<Business> favorites;
   final void Function(Business) onFavorite;
 
@@ -1692,11 +1898,9 @@ class FavoritesPage
     if (favorites.isEmpty) {
       return const Center(
         child: Padding(
-          padding:
-              EdgeInsets.all(25),
+          padding: EdgeInsets.all(30),
           child: Column(
-            mainAxisSize:
-                MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.favorite_border,
@@ -1705,19 +1909,16 @@ class FavoritesPage
               ),
               SizedBox(height: 15),
               Text(
-                'No favorite businesses yet.',
-                textAlign:
-                    TextAlign.center,
-                style:
-                    TextStyle(fontSize: 18),
+                'No Favorites Yet',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: 8),
               Text(
-                'Tap the ❤️ button on a business to save it here.',
-                textAlign:
-                    TextAlign.center,
-                style:
-                    TextStyle(color: Colors.grey),
+                'Save businesses here for quick access.',
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -1726,363 +1927,42 @@ class FavoritesPage
     }
 
     return ListView.builder(
-      padding:
-          const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        100,
+      ),
       itemCount: favorites.length,
-      itemBuilder:
-          (context, index) {
-        final business =
-            favorites[index];
-
+      itemBuilder: (_, index) {
         return BusinessCard(
-          business: business,
-          isFavorite: true,
-          onFavorite: () =>
-              onFavorite(business),
+          business: favorites[index],
+          favorite: true,
+          onFavorite: () {
+            onFavorite(favorites[index]);
+          },
         );
       },
     );
   }
 }
 
-/* ============================================================
-   ADD BUSINESS
-============================================================ */
+// ============================================================
+// LOGIN
+// ============================================================
 
-class AddBusinessPage
-    extends StatefulWidget {
-  const AddBusinessPage({super.key});
-
-  @override
-  State<AddBusinessPage>
-      createState() =>
-          _AddBusinessPageState();
-}
-
-class _AddBusinessPageState
-    extends State<AddBusinessPage> {
-  final nameController =
-      TextEditingController();
-
-  final categoryController =
-      TextEditingController();
-
-  final countryCodeController =
-      TextEditingController();
-
-  final phoneController =
-      TextEditingController();
-
-  final addressController =
-      TextEditingController();
-
-  final hoursController =
-      TextEditingController();
-
-  final descriptionController =
-      TextEditingController();
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    categoryController.dispose();
-    countryCodeController.dispose();
-    phoneController.dispose();
-    addressController.dispose();
-    hoursController.dispose();
-    descriptionController.dispose();
-    super.dispose();
-  }
-
-  void submitBusiness() {
-    final name =
-        nameController.text.trim();
-    final category =
-        categoryController.text.trim();
-    final countryCode =
-        countryCodeController.text.trim();
-    final phone =
-        phoneController.text.trim();
-    final address =
-        addressController.text.trim();
-    final hours =
-        hoursController.text.trim();
-    final description =
-        descriptionController.text.trim();
-
-    if (name.isEmpty ||
-        category.isEmpty ||
-        phone.isEmpty ||
-        address.isEmpty) {
-      showMessage(
-        context,
-        'Please complete the required business information.',
-      );
-      return;
-    }
-
-    String finalPhone = phone;
-
-    if (countryCode.isNotEmpty &&
-        !phone.startsWith('+')) {
-      final cleanCode =
-          countryCode.replaceAll(
-        RegExp(r'[^0-9+]'),
-        '',
-      );
-
-      final cleanPhone =
-          phone.replaceAll(
-        RegExp(r'[^0-9]'),
-        '',
-      );
-
-      if (cleanCode.isNotEmpty) {
-        finalPhone =
-            '$cleanCode$cleanPhone';
-      }
-    }
-
-    final business =
-        Business(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      name: name,
-      category: category,
-      address: address,
-      phone: finalPhone,
-      mapsUrl: '',
-      description: description,
-      openingHours: hours,
-      rating: 0,
-      reviewCount: 0,
-      openNow: false,
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            BusinessDetailsPage(
-          business: business,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title:
-            const Text('List Your Business'),
-      ),
-      body: ListView(
-        padding:
-            const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Create Your Business Profile',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight:
-                  FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          const Text(
-            'Add your business information so customers can discover and contact you.',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 15,
-              height: 1.4,
-            ),
-          ),
-
-          const SizedBox(height: 25),
-
-          businessField(
-            nameController,
-            'Business Name',
-            Icons.store,
-          ),
-
-          businessField(
-            categoryController,
-            'Business Category',
-            Icons.category,
-          ),
-
-          Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 110,
-                child: businessField(
-                  countryCodeController,
-                  'Code',
-                  Icons.public,
-                  keyboard:
-                      TextInputType.phone,
-                  hint:
-                      '+92',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: businessField(
-                  phoneController,
-                  'Phone Number',
-                  Icons.phone,
-                  keyboard:
-                      TextInputType.phone,
-                  hint:
-                      '3001234567',
-                ),
-              ),
-            ],
-          ),
-
-          businessField(
-            addressController,
-            'Business Address',
-            Icons.location_on,
-          ),
-
-          businessField(
-            hoursController,
-            'Opening Hours',
-            Icons.access_time,
-            hint:
-                'Example: Mon-Sat, 10 AM - 8 PM',
-          ),
-
-          businessField(
-            descriptionController,
-            'Business Description',
-            Icons.description,
-            maxLines: 5,
-            hint:
-                'Tell customers about your business...',
-          ),
-
-          const SizedBox(height: 10),
-
-          Container(
-            padding:
-                const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.blue
-                  .withValues(alpha: 0.06),
-              borderRadius:
-                  BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.blue
-                    .withValues(alpha: 0.15),
-              ),
-            ),
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.photo_library_outlined,
-                  color: Colors.blue,
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Business photos can be connected when the online storage/backend is added.',
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          SizedBox(
-            height: 54,
-            child: ElevatedButton.icon(
-              onPressed:
-                  submitBusiness,
-              icon: const Icon(
-                Icons.check_circle_outline,
-              ),
-              label: const Text(
-                'Create Business Profile',
-                style:
-                    TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 30),
-        ],
-      ),
-    );
-  }
-
-  Widget businessField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    int maxLines = 1,
-    TextInputType? keyboard,
-    String? hint,
-  }) {
-    return Padding(
-      padding:
-          const EdgeInsets.only(
-        bottom: 14,
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboard,
-        decoration:
-            InputDecoration(
-          labelText: label,
-          hintText: hint,
-          prefixIcon:
-              Icon(icon),
-          filled: true,
-          fillColor: Colors.white,
-          border:
-              OutlineInputBorder(
-            borderRadius:
-                BorderRadius.circular(
-              15,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/* ============================================================
-   LOGIN
-============================================================ */
-
-class LoginPage
-    extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() =>
-      _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState
-    extends State<LoginPage> {
-  final emailController =
-      TextEditingController();
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-  final passwordController =
-      TextEditingController();
-
-  bool hidePassword = true;
+  bool obscure = true;
 
   @override
   void dispose() {
@@ -2092,23 +1972,30 @@ class _LoginPageState
   }
 
   void login() {
-    final email =
-        emailController.text.trim();
-    final password =
-        passwordController.text;
-
-    if (email.isEmpty ||
-        password.isEmpty) {
-      showMessage(
-        context,
-        'Please enter your email and password.',
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter email and password.'),
+        ),
       );
       return;
     }
 
-    showMessage(
-      context,
-      'Login will be connected to the secure backend.',
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Login'),
+        content: const Text(
+          'Login screen is ready. Real account authentication will be connected to the backend/database.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2116,158 +2003,83 @@ class _LoginPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Welcome Back'),
+        title: const Text('Login'),
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(24),
         children: [
           const SizedBox(height: 20),
-
-          Container(
-            padding:
-                const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient:
-                  const LinearGradient(
-                colors: [
-                  Colors.blue,
-                  Colors.indigo,
-                ],
-              ),
-              borderRadius:
-                  BorderRadius.circular(25),
-            ),
-            child: const Column(
-              children: [
-                CircleAvatar(
-                  radius: 42,
-                  backgroundColor:
-                      Colors.white,
-                  child: Icon(
-                    Icons.business_center,
-                    size: 42,
-                    color: Colors.blue,
-                  ),
-                ),
-                SizedBox(height: 15),
-                Text(
-                  'Local Business & Services',
-                  textAlign:
-                      TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Sign in to manage your account and businesses.',
-                  textAlign:
-                      TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
+          const CircleAvatar(
+            radius: 45,
+            child: Icon(
+              Icons.person,
+              size: 50,
             ),
           ),
-
-          const SizedBox(height: 28),
-
-          TextField(
-            controller:
-                emailController,
-            keyboardType:
-                TextInputType.emailAddress,
-            decoration:
-                InputDecoration(
-              labelText: 'Email Address',
-              prefixIcon:
-                  const Icon(
-                Icons.email_outlined,
-              ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
-              ),
+          const SizedBox(height: 25),
+          const Text(
+            'Welcome Back',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
             ),
           ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 8),
+          const Text(
+            'Login to your account',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
           TextField(
-            controller:
-                passwordController,
-            obscureText: hidePassword,
-            decoration:
-                InputDecoration(
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email_outlined),
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: passwordController,
+            obscureText: obscure,
+            decoration: InputDecoration(
               labelText: 'Password',
-              prefixIcon:
-                  const Icon(
-                Icons.lock_outline,
-              ),
-              suffixIcon:
-                  IconButton(
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    obscure = !obscure;
+                  });
+                },
                 icon: Icon(
-                  hidePassword
+                  obscure
                       ? Icons.visibility
                       : Icons.visibility_off,
                 ),
-                onPressed: () {
-                  setState(() {
-                    hidePassword =
-                        !hidePassword;
-                  });
-                },
               ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
+            ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: login,
+            child: const Padding(
+              padding: EdgeInsets.all(14),
+              child: Text('Login'),
+            ),
+          ),
+          const SizedBox(height: 15),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SignupPage(),
                 ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 22),
-
-          SizedBox(
-            height: 54,
-            child:
-                ElevatedButton(
-              onPressed: login,
-              child: const Text(
-                'Sign In',
-                style:
-                    TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const SignupPage(),
-                  ),
-                );
-              },
-              child: const Text(
-                'New here? Create an account',
-              ),
+              );
+            },
+            child: const Text(
+              'Create a new account',
             ),
           ),
         ],
@@ -2276,35 +2088,22 @@ class _LoginPageState
   }
 }
 
-/* ============================================================
-   SIGN UP
-============================================================ */
+// ============================================================
+// SIGNUP
+// ============================================================
 
-class SignupPage
-    extends StatefulWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() =>
-      _SignupPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupPageState
-    extends State<SignupPage> {
-  final nameController =
-      TextEditingController();
-
-  final emailController =
-      TextEditingController();
-
-  final passwordController =
-      TextEditingController();
-
-  final confirmController =
-      TextEditingController();
-
-  bool hidePassword = true;
-  bool hideConfirm = true;
+class _SignupPageState extends State<SignupPage> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
 
   @override
   void dispose() {
@@ -2315,46 +2114,46 @@ class _SignupPageState
     super.dispose();
   }
 
-  void createAccount() {
-    final name =
-        nameController.text.trim();
-    final email =
-        emailController.text.trim();
-    final password =
-        passwordController.text;
-    final confirm =
-        confirmController.text;
-
-    if (name.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirm.isEmpty) {
-      showMessage(
-        context,
-        'Please complete all fields.',
+  void signup() {
+    if (nameController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please complete all fields.'),
+        ),
       );
       return;
     }
 
-    if (password != confirm) {
-      showMessage(
-        context,
-        'Passwords do not match.',
+    if (passwordController.text !=
+        confirmController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match.'),
+        ),
       );
       return;
     }
 
-    if (password.length < 6) {
-      showMessage(
-        context,
-        'Password must contain at least 6 characters.',
-      );
-      return;
-    }
-
-    showMessage(
-      context,
-      'Account details are ready for secure backend connection.',
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Account Ready'),
+        content: const Text(
+          'Signup screen is ready. Permanent account creation will be connected to the backend/database.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2362,180 +2161,64 @@ class _SignupPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Create Your Account'),
+        title: const Text('Create Account'),
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(24),
         children: [
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 10),
           const Text(
             'Join Local Business & Services',
             style: TextStyle(
-              fontSize: 25,
-              fontWeight:
-                  FontWeight.bold,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 8),
-
           const Text(
-            'Create your account to discover businesses or manage your own business profile.',
-            style: TextStyle(
-              color: Colors.grey,
-              height: 1.4,
-            ),
+            'Create your account to save businesses and manage your profile.',
           ),
-
           const SizedBox(height: 25),
-
           TextField(
-            controller:
-                nameController,
-            decoration:
-                InputDecoration(
+            controller: nameController,
+            decoration: const InputDecoration(
               labelText: 'Full Name',
-              prefixIcon:
-                  const Icon(
-                Icons.person_outline,
-              ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
-              ),
+              prefixIcon: Icon(Icons.person_outline),
             ),
           ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 14),
           TextField(
-            controller:
-                emailController,
-            keyboardType:
-                TextInputType.emailAddress,
-            decoration:
-                InputDecoration(
-              labelText: 'Email Address',
-              prefixIcon:
-                  const Icon(
-                Icons.email_outlined,
-              ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
-              ),
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email_outlined),
             ),
           ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 14),
           TextField(
-            controller:
-                passwordController,
-            obscureText: hidePassword,
-            decoration:
-                InputDecoration(
+            controller: passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(
               labelText: 'Password',
-              prefixIcon:
-                  const Icon(
-                Icons.lock_outline,
-              ),
-              suffixIcon:
-                  IconButton(
-                icon: Icon(
-                  hidePassword
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    hidePassword =
-                        !hidePassword;
-                  });
-                },
-              ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
-              ),
+              prefixIcon: Icon(Icons.lock_outline),
             ),
           ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 14),
           TextField(
-            controller:
-                confirmController,
-            obscureText: hideConfirm,
-            decoration:
-                InputDecoration(
-              labelText:
-                  'Confirm Password',
-              prefixIcon:
-                  const Icon(
-                Icons.verified_user_outlined,
-              ),
-              suffixIcon:
-                  IconButton(
-                icon: Icon(
-                  hideConfirm
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    hideConfirm =
-                        !hideConfirm;
-                  });
-                },
-              ),
-              border:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
-              ),
+            controller: confirmController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Confirm Password',
+              prefixIcon: Icon(Icons.lock_outline),
             ),
           ),
-
-          const SizedBox(height: 24),
-
-          SizedBox(
-            height: 54,
-            child:
-                ElevatedButton(
-              onPressed:
-                  createAccount,
-              child: const Text(
-                'Create Account',
-                style:
-                    TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'Your account will be connected to a secure backend when authentication is added.',
-            textAlign:
-                TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
+          const SizedBox(height: 22),
+          FilledButton(
+            onPressed: signup,
+            child: const Padding(
+              padding: EdgeInsets.all(14),
+              child: Text('Create Account'),
             ),
           ),
         ],
@@ -2544,67 +2227,602 @@ class _SignupPageState
   }
 }
 
-/* ============================================================
-   NOTIFICATIONS
-============================================================ */
+// ============================================================
+// ADD BUSINESS
+// ============================================================
 
-class NotificationsPage
-    extends StatelessWidget {
-  const NotificationsPage({
-    super.key,
-  });
+class AddBusinessPage extends StatefulWidget {
+  const AddBusinessPage({super.key});
+
+  @override
+  State<AddBusinessPage> createState() =>
+      _AddBusinessPageState();
+}
+
+class _AddBusinessPageState
+    extends State<AddBusinessPage> {
+  final nameController = TextEditingController();
+  final categoryController = TextEditingController();
+  final addressController = TextEditingController();
+  final phoneController = TextEditingController();
+  final websiteController = TextEditingController();
+  final descriptionController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    categoryController.dispose();
+    addressController.dispose();
+    phoneController.dispose();
+    websiteController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  void submit() {
+    if (nameController.text.trim().isEmpty ||
+        categoryController.text.trim().isEmpty ||
+        addressController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Business name, category and address are required.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Business Submitted'),
+        content: const Text(
+          'Your business information is ready. Permanent business submission and approval will be connected to the backend/database.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Notifications'),
+        title: const Text('List Your Business'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.notifications_none,
-              size: 80,
-              color: Colors.grey,
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          40,
+        ),
+        children: [
+          const Text(
+            'Add Your Business',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 15),
-            const Text(
-              'No new notifications',
-              style:
-                  TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Create a professional listing for customers around the world.',
+          ),
+          const SizedBox(height: 25),
+          field(
+            nameController,
+            'Business Name',
+            Icons.business,
+          ),
+          field(
+            categoryController,
+            'Category',
+            Icons.category_outlined,
+          ),
+          field(
+            addressController,
+            'Address',
+            Icons.location_on_outlined,
+          ),
+          field(
+            phoneController,
+            'Phone Number',
+            Icons.phone_outlined,
+            keyboard: TextInputType.phone,
+          ),
+          field(
+            websiteController,
+            'Website',
+            Icons.language,
+            keyboard: TextInputType.url,
+          ),
+          field(
+            descriptionController,
+            'Business Description',
+            Icons.description_outlined,
+            maxLines: 5,
+          ),
+          const SizedBox(height: 15),
+          FilledButton.icon(
+            onPressed: submit,
+            icon: const Icon(Icons.send),
+            label: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('Submit Business'),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'You are all caught up.',
-              style:
-                  TextStyle(color: Colors.grey),
-            ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget field(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType? keyboard,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboard,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          alignLabelWithHint: maxLines > 1,
         ),
       ),
     );
   }
 }
 
-/* ============================================================
-   MESSAGE HELPER
-============================================================ */
+// ============================================================
+// MY BUSINESS
+// ============================================================
 
-void showMessage(
-  BuildContext context,
-  String message,
-) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior:
-            SnackBarBehavior.floating,
+class MyBusinessPage extends StatelessWidget {
+  const MyBusinessPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Business'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.business_center_outlined,
+                size: 75,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'Manage Your Business',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Your business listings will appear here after backend/database integration.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AddBusinessPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add_business),
+                label: const Text('Add Business'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Profile'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const CircleAvatar(
+            radius: 50,
+            child: Icon(
+              Icons.person,
+              size: 55,
+            ),
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            'Guest User',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Login to manage your profile',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 25),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Edit Profile'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 15),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EditProfilePage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.business),
+            title: const Text('My Business'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 15),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const MyBusinessPage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 15),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// EDIT PROFILE
+// ============================================================
+
+class EditProfilePage extends StatefulWidget {
+  const EditProfilePage({super.key});
+
+  @override
+  State<EditProfilePage> createState() =>
+      _EditProfilePageState();
+}
+
+class _EditProfilePageState
+    extends State<EditProfilePage> {
+  final nameController =
+      TextEditingController(text: 'Guest User');
+  final emailController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Profile'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const CircleAvatar(
+            radius: 45,
+            child: Icon(
+              Icons.person,
+              size: 50,
+            ),
+          ),
+          const SizedBox(height: 25),
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Full Name',
+              prefixIcon: Icon(Icons.person),
+            ),
+          ),
+          const SizedBox(height: 15),
+          TextField(
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email),
+            ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Profile changes will be saved through the backend later.',
+                  ),
+                ),
+              );
+            },
+            child: const Text('Save Changes'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+class NotificationsPage extends StatelessWidget {
+  const NotificationsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Notifications'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Icon(Icons.notifications),
+              ),
+              title: Text('Welcome'),
+              subtitle: Text(
+                'Welcome to Local Business & Services.',
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Icon(Icons.star),
+              ),
+              title: Text('Reviews'),
+              subtitle: Text(
+                'Business reviews and notifications will appear here.',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: const Text('Language'),
+            subtitle: const Text('English'),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notifications'),
+            subtitle: const Text('Manage notifications'),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy'),
+            subtitle: const Text('Privacy settings'),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('Help & Support'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HelpPage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AboutPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// HELP
+// ============================================================
+
+class HelpPage extends StatelessWidget {
+  const HelpPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Help & Support'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: const [
+          Text(
+            'How can we help?',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 15),
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.search),
+              title: Text('Finding a business'),
+              subtitle: Text(
+                'Use Search or Nearby to discover businesses and services.',
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.star),
+              title: Text('Ratings and reviews'),
+              subtitle: Text(
+                'Open a business and use Ratings & Reviews to view or submit feedback.',
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.business),
+              title: Text('List your business'),
+              subtitle: Text(
+                'Use List Your Business to create a business listing.',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ABOUT
+// ============================================================
+
+class AboutPage extends StatelessWidget {
+  const AboutPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('About'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              CircleAvatar(
+                radius: 45,
+                child: Icon(
+                  Icons.business,
+                  size: 50,
+                ),
+              ),
+              SizedBox(height: 18),
+              Text(
+                'Local Business & Services',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'A global platform for discovering local businesses and professional services.',
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 18),
+              Text(
+                'Version 1.0',
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
