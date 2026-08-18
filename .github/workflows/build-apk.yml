@@ -28,21 +28,27 @@ jobs:
           cp lib/main.dart app/lib/main.dart
           cp pubspec.yaml app/pubspec.yaml
 
-      - name: Create Firebase config
+      - name: Create Firebase Android config
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           printf '%s' "$GOOGLE_SERVICES_JSON" > app/android/app/google-services.json
 
+      - name: Configure Android application ID
+        working-directory: app/android/app
+        run: |
+          sed -i 's/applicationId = "[^"]*"/applicationId = "com.localbusinessservices"/' build.gradle.kts
+          sed -i 's/namespace = "[^"]*"/namespace = "com.localbusinessservices"/' build.gradle.kts
+
       - name: Add Google Services plugin
         working-directory: app/android
         run: |
-          sed -i "/plugins {/a\\    id 'com.google.gms.google-services' version '4.4.2' apply false" settings.gradle
+          sed -i '/plugins {/a\    id("com.google.gms.google-services") version "4.4.2" apply false' settings.gradle.kts
 
       - name: Apply Google Services plugin
         working-directory: app/android/app
         run: |
-          sed -i "/plugins {/a\\    id 'com.google.gms.google-services'" build.gradle.kts
+          sed -i '/plugins {/a\    id("com.google.gms.google-services")' build.gradle.kts
 
       - name: Add Internet permission
         run: |
