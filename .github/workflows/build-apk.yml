@@ -1,4 +1,16 @@
-name: Build Local Business Services APK
+      - name: Create Flutter project
+        run: |
+          flutter create \
+            --org com.localbusinessservices \
+            app
+
+      - name: Add Internet permission
+        run: |
+          sed -i '/<manifest/a\    <uses-permission android:name="android.permission.INTERNET"/>' app/android/app/src/main/AndroidManifest.xml
+
+      - name: Copy app code
+        run: |
+          cp lib/main.dart app/lib/main.dart
 
 on:
   workflow_dispatch:
