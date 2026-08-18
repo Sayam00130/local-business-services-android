@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -371,26 +374,191 @@ class SearchTab extends StatelessWidget {
   }
 }
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final TextEditingController searchController = TextEditingController();
+
+  List<Business> results = [];
+  bool isLoading = false;
+  String errorMessage = '';
+
+  static const String apiKey = String.fromEnvironment(
+    'GOOGLE_PLACES_API_KEY',
+  );
+
+  Future<void> searchBusinesses() async {
+    final query = searchController.text.trim();
+
+    if (query.isEmpty) {
+      setState(() {
+        results = [];
+        errorMessage = '';
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      final uri = Uri.parse(
+        'https://places.googleapis.com/v1/places:searchText',
+      );
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask':
+              'places.displayName,places.formattedAddress,places.primaryType,places.rating,places.nationalPhoneNumber,places.id',
+        },
+        body: jsonEncode({
+          'textQuery': query,
+          'pageSize': 20,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Places API error: ${response.statusCode}',
+        );
+      }
+
+      final data = jsonDecode(response.body);
+      final places = data['places'] as List? ?? [];
+
+      final newResults = places.map<Business>((place) {
+        final displayName = place['displayName'];
+        final name = displayName is Map
+            ? (displayName['text'] ?? 'Unknown Business').toString()
+            : 'Unknown Business';
+
+        final address =
+            place['formattedAddress']?.toString() ?? 'Location unavailable';
+
+        final category =
+            place['primaryType']?.toString() ?? 'Business';
+
+        final phone =
+            place['nationalPhoneNumber']?.toString() ?? '';
+
+        final ratingValue = place['rating'];
+
+        final rating = ratingValue is num
+            ? ratingValue.toDouble()
+            : 0.0;
+
+        return Business(
+          name: name,
+          category: category,
+          location: address,
+          phone: phone,
+          rating: rating,
+          icon: Icons.business,
+        );
+      }).toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        results = newResults;
+        isLoading = false;
+
+        if (newResults.isEmpty) {
+          errorMessage = 'No businesses found.';
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+        results = [];
+        errorMessage = 'Could not search businesses.';
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
-      body: ListView(
+      appBar: AppBar(
+        title: const Text('Search Businesses'),
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          TextField(
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: 'Search business or service...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+        child: Column(
+          children: [
+            TextField(
+              controller: searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => searchBusinesses(),
+              decoration: InputDecoration(
+                hintText: 'Search business, service or location...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: searchBusinesses,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
             ),
-          ),
+
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : errorMessage.isNotEmpty
+                      ? Center(
+                          child: Text(
+                            errorMessage,
+                            style: const TextStyle(fontSize: 17),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : results.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Search for a business or service.',
+                                style: TextStyle(fontSize: 17),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: results.length,
+                              itemBuilder: (context, index) {
+                                return BusinessCard(
+                                  business: results[index],
+                                );
+                              },
+                            ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
           const SizedBox(height: 20),
           ...businesses.map((b) => BusinessCard(business: b)),
         ],
