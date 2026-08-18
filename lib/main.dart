@@ -8,6 +8,10 @@ void main() {
   runApp(const LocalBusinessServicesApp());
 }
 
+/* ============================================================
+   APP
+============================================================ */
+
 class LocalBusinessServicesApp extends StatelessWidget {
   const LocalBusinessServicesApp({super.key});
 
@@ -26,9 +30,9 @@ class LocalBusinessServicesApp extends StatelessWidget {
   }
 }
 
-// ============================================================
-// MODEL
-// ============================================================
+/* ============================================================
+   BUSINESS MODEL
+============================================================ */
 
 class Business {
   final String id;
@@ -37,6 +41,8 @@ class Business {
   final String address;
   final String phone;
   final String mapsUrl;
+  final String description;
+  final String openingHours;
   final double rating;
   final int reviewCount;
   final bool openNow;
@@ -48,15 +54,17 @@ class Business {
     required this.address,
     required this.phone,
     required this.mapsUrl,
-    required this.rating,
-    required this.reviewCount,
-    required this.openNow,
+    this.description = '',
+    this.openingHours = '',
+    this.rating = 0,
+    this.reviewCount = 0,
+    this.openNow = false,
   });
 }
 
-// ============================================================
-// HOME
-// ============================================================
+/* ============================================================
+   HOME
+============================================================ */
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,6 +75,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
+
   final List<Business> favorites = [];
 
   bool isFavorite(Business business) {
@@ -110,22 +119,31 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text(
           'Local Business & Services',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            tooltip: 'Notifications',
+            icon: const Icon(
+              Icons.notifications_outlined,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const NotificationsPage(),
+                  builder: (_) =>
+                      const NotificationsPage(),
                 ),
               );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.person_outline),
+            tooltip: 'Account',
+            icon: const Icon(
+              Icons.person_outline,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -148,7 +166,7 @@ class _HomePageState extends State<HomePage> {
           );
         },
         icon: const Icon(Icons.add_business),
-        label: const Text('Add Business'),
+        label: const Text('List Your Business'),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
@@ -184,9 +202,9 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ============================================================
-// HOME TAB
-// ============================================================
+/* ============================================================
+   HOME TAB
+============================================================ */
 
 class HomeTab extends StatelessWidget {
   final bool Function(Business) isFavorite;
@@ -215,7 +233,8 @@ class HomeTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
           ),
           child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Text(
                 'Discover Local Businesses',
@@ -225,12 +244,13 @@ class HomeTab extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 10),
               Text(
-                'Find businesses and services around the world.',
+                'Find businesses, services, shops, restaurants and more around the world.',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 15,
+                  height: 1.4,
                 ),
               ),
             ],
@@ -273,14 +293,14 @@ class HomeTab extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  size: 15,
+                  size: 16,
                 ),
               ],
             ),
           ),
         ),
 
-        const SizedBox(height: 26),
+        const SizedBox(height: 28),
 
         const Text(
           'Explore Categories',
@@ -293,46 +313,46 @@ class HomeTab extends StatelessWidget {
         const SizedBox(height: 12),
 
         SizedBox(
-          height: 110,
+          height: 112,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              category(
+              categoryItem(
                 context,
                 Icons.restaurant,
                 'Restaurants',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.local_hospital,
-                'Doctors',
+                'Healthcare',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.electrical_services,
                 'Electricians',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.plumbing,
                 'Plumbers',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.car_repair,
                 'Mechanics',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.store,
                 'Shops',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.school,
                 'Schools',
               ),
-              category(
+              categoryItem(
                 context,
                 Icons.hotel,
                 'Hotels',
@@ -341,7 +361,7 @@ class HomeTab extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 26),
+        const SizedBox(height: 28),
 
         const Text(
           'Quick Access',
@@ -357,27 +377,24 @@ class HomeTab extends StatelessWidget {
           context,
           Icons.search,
           'Search Businesses',
-          'Find real businesses with Google Places.',
+          'Find real businesses using Google Places.',
           const SearchPage(),
         ),
 
         quickCard(
           context,
           Icons.location_on,
-          'Nearby',
-          'Discover businesses in any city or area.',
+          'Nearby Businesses',
+          'Search businesses around your city or area.',
           const NearbyPage(),
         ),
 
         quickCard(
           context,
-          Icons.favorite,
-          'Favorites',
-          'Keep your favorite businesses in one place.',
-          FavoritesPage(
-            favorites: const [],
-            onFavorite: (_) {},
-          ),
+          Icons.add_business,
+          'List Your Business',
+          'Create a professional business profile.',
+          const AddBusinessPage(),
         ),
 
         const SizedBox(height: 100),
@@ -385,7 +402,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget category(
+  Widget categoryItem(
     BuildContext context,
     IconData icon,
     String title,
@@ -395,9 +412,8 @@ class HomeTab extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CategorySearchPage(
-              title: title,
-            ),
+            builder: (_) =>
+                CategorySearchPage(title: title),
           ),
         );
       },
@@ -413,7 +429,8 @@ class HomeTab extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment:
+              MainAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -457,7 +474,7 @@ class HomeTab extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: const Icon(
           Icons.arrow_forward_ios,
-          size: 15,
+          size: 16,
         ),
         onTap: () {
           Navigator.push(
@@ -472,12 +489,13 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ============================================================
-// GOOGLE PLACES
-// ============================================================
+/* ============================================================
+   GOOGLE PLACES SERVICE
+============================================================ */
 
 class PlacesService {
-  static const String apiKey = String.fromEnvironment(
+  static const String apiKey =
+      String.fromEnvironment(
     'GOOGLE_PLACES_API_KEY',
   );
 
@@ -498,7 +516,7 @@ class PlacesService {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': apiKey,
         'X-Goog-FieldMask':
-            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
+            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
       },
       body: jsonEncode({
         'textQuery': query,
@@ -516,7 +534,8 @@ class PlacesService {
         if (data is Map &&
             data['error'] is Map &&
             data['error']['message'] != null) {
-          message = data['error']['message'].toString();
+          message =
+              data['error']['message'].toString();
         }
       } catch (_) {}
 
@@ -531,31 +550,48 @@ class PlacesService {
     }
 
     return places.map<Business>((place) {
-      final displayName = place['displayName'];
+      final displayName =
+          place['displayName'];
 
       final name = displayName is Map
-          ? (displayName['text'] ?? 'Unknown Business')
+          ? (displayName['text'] ??
+                  'Unknown Business')
               .toString()
           : 'Unknown Business';
 
       final category =
-          (place['primaryType'] ?? 'Business')
+          (place['primaryType'] ??
+                  'Business')
               .toString()
               .replaceAll('_', ' ');
 
       final address =
-          place['formattedAddress']?.toString() ??
+          place['formattedAddress']
+                  ?.toString() ??
               'Address unavailable';
 
+      // International phone number preferred.
+      final internationalPhone =
+          place['internationalPhoneNumber']
+              ?.toString();
+
+      final nationalPhone =
+          place['nationalPhoneNumber']
+              ?.toString();
+
       final phone =
-          place['nationalPhoneNumber']?.toString() ??
-              '';
+          (internationalPhone != null &&
+                  internationalPhone.isNotEmpty)
+              ? internationalPhone
+              : (nationalPhone ?? '');
 
       final mapsUrl =
-          place['googleMapsUri']?.toString() ??
+          place['googleMapsUri']
+                  ?.toString() ??
               '';
 
-      final ratingValue = place['rating'];
+      final ratingValue =
+          place['rating'];
 
       final rating = ratingValue is num
           ? ratingValue.toDouble()
@@ -564,9 +600,10 @@ class PlacesService {
       final reviewValue =
           place['userRatingCount'];
 
-      final reviewCount = reviewValue is num
-          ? reviewValue.toInt()
-          : 0;
+      final reviewCount =
+          reviewValue is num
+              ? reviewValue.toInt()
+              : 0;
 
       bool openNow = false;
 
@@ -579,7 +616,8 @@ class PlacesService {
       }
 
       return Business(
-        id: place['id']?.toString() ?? name,
+        id: place['id']?.toString() ??
+            name,
         name: name,
         category: category,
         address: address,
@@ -593,9 +631,9 @@ class PlacesService {
   }
 }
 
-// ============================================================
-// SEARCH PAGE
-// ============================================================
+/* ============================================================
+   SEARCH PAGE
+============================================================ */
 
 class SearchPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -607,7 +645,9 @@ class SearchPage extends StatefulWidget {
     this.onFavorite = _defaultFavoriteAction,
   });
 
-  static bool _defaultFavorite(Business business) {
+  static bool _defaultFavorite(
+    Business business,
+  ) {
     return false;
   }
 
@@ -616,18 +656,22 @@ class SearchPage extends StatefulWidget {
   ) {}
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  State<SearchPage> createState() =>
+      _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
-  final controller = TextEditingController();
+class _SearchPageState
+    extends State<SearchPage> {
+  final controller =
+      TextEditingController();
 
   List<Business> results = [];
   bool loading = false;
   String error = '';
 
   Future<void> search() async {
-    final query = controller.text.trim();
+    final query =
+        controller.text.trim();
 
     if (query.isEmpty) {
       setState(() {
@@ -680,12 +724,14 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Businesses'),
+        title:
+            const Text('Search Businesses'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding:
+                const EdgeInsets.all(16),
             child: TextField(
               controller: controller,
               textInputAction:
@@ -696,14 +742,16 @@ class _SearchPageState extends State<SearchPage> {
                     'Business, service or location...',
                 prefixIcon:
                     const Icon(Icons.search),
-                suffixIcon: IconButton(
+                suffixIcon:
+                    IconButton(
                   icon:
                       const Icon(Icons.search),
                   onPressed: search,
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(
+                border:
+                    OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(16),
                 ),
@@ -721,7 +769,7 @@ class _SearchPageState extends State<SearchPage> {
                         child: Padding(
                           padding:
                               const EdgeInsets.all(
-                            24,
+                            25,
                           ),
                           child: Text(
                             error,
@@ -749,13 +797,15 @@ class _SearchPageState extends State<SearchPage> {
                                   results[index];
 
                               return BusinessCard(
-                                business: business,
+                                business:
+                                    business,
                                 isFavorite:
                                     widget.isFavorite(
                                   business,
                                 ),
-                                onFavorite: () =>
-                                    widget.onFavorite(
+                                onFavorite:
+                                    () => widget
+                                        .onFavorite(
                                   business,
                                 ),
                               );
@@ -768,9 +818,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// ============================================================
-// NEARBY
-// ============================================================
+/* ============================================================
+   NEARBY PAGE
+============================================================ */
 
 class NearbyPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -870,26 +920,26 @@ class _NearbyPageState
                   locationController,
               textInputAction:
                   TextInputAction.search,
-              onSubmitted:
-                  (_) => findNearby(),
+              onSubmitted: (_) =>
+                  findNearby(),
               decoration: InputDecoration(
                 hintText:
                     'Enter city or area...',
-                prefixIcon:
-                    const Icon(
+                prefixIcon: const Icon(
                   Icons.location_on,
                 ),
-                suffixIcon: IconButton(
-                  icon:
-                      const Icon(Icons.search),
-                  onPressed: findNearby,
+                suffixIcon:
+                    IconButton(
+                  icon: const Icon(
+                    Icons.search,
+                  ),
+                  onPressed:
+                      findNearby,
                 ),
                 border:
                     OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(
-                    16,
-                  ),
+                      BorderRadius.circular(16),
                 ),
               ),
             ),
@@ -905,7 +955,7 @@ class _NearbyPageState
                         child: Padding(
                           padding:
                               const EdgeInsets.all(
-                            24,
+                            20,
                           ),
                           child: Text(
                             error,
@@ -935,13 +985,15 @@ class _NearbyPageState
                                   results[index];
 
                               return BusinessCard(
-                                business: business,
+                                business:
+                                    business,
                                 isFavorite:
                                     widget.isFavorite(
                                   business,
                                 ),
-                                onFavorite: () =>
-                                    widget.onFavorite(
+                                onFavorite:
+                                    () => widget
+                                        .onFavorite(
                                   business,
                                 ),
                               );
@@ -954,9 +1006,9 @@ class _NearbyPageState
   }
 }
 
-// ============================================================
-// CATEGORY
-// ============================================================
+/* ============================================================
+   CATEGORY SEARCH
+============================================================ */
 
 class CategorySearchPage
     extends StatefulWidget {
@@ -968,8 +1020,9 @@ class CategorySearchPage
   });
 
   @override
-  State<CategorySearchPage> createState() =>
-      _CategorySearchPageState();
+  State<CategorySearchPage>
+      createState() =>
+          _CategorySearchPageState();
 }
 
 class _CategorySearchPageState
@@ -1029,7 +1082,9 @@ class _CategorySearchPageState
               ? Center(
                   child: Padding(
                     padding:
-                        const EdgeInsets.all(24),
+                        const EdgeInsets.all(
+                      20,
+                    ),
                     child: Text(
                       error,
                       textAlign:
@@ -1037,26 +1092,34 @@ class _CategorySearchPageState
                     ),
                   ),
                 )
-              : ListView.builder(
-                  padding:
-                      const EdgeInsets.all(16),
-                  itemCount:
-                      results.length,
-                  itemBuilder:
-                      (context, index) {
-                    return BusinessCard(
-                      business:
-                          results[index],
-                    );
-                  },
-                ),
+              : results.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No businesses found.',
+                      ),
+                    )
+                  : ListView.builder(
+                      padding:
+                          const EdgeInsets.all(
+                        16,
+                      ),
+                      itemCount:
+                          results.length,
+                      itemBuilder:
+                          (context, index) {
+                        return BusinessCard(
+                          business:
+                              results[index],
+                        );
+                      },
+                    ),
     );
   }
 }
 
-// ============================================================
-// BUSINESS CARD
-// ============================================================
+/* ============================================================
+   BUSINESS CARD
+============================================================ */
 
 class BusinessCard
     extends StatelessWidget {
@@ -1088,8 +1151,7 @@ class BusinessCard
         title: Text(
           business.name,
           style: const TextStyle(
-            fontWeight:
-                FontWeight.bold,
+            fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Column(
@@ -1097,15 +1159,17 @@ class BusinessCard
               CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 5),
-            Text(business.category),
+            Text(
+              business.category,
+            ),
             const SizedBox(height: 3),
             Text(
-              '📍 ${business.address}',
+              business.address,
               maxLines: 2,
               overflow:
                   TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Row(
               children: [
                 const Icon(
@@ -1116,7 +1180,8 @@ class BusinessCard
                 Text(
                   ' ${business.rating.toStringAsFixed(1)}',
                 ),
-                if (business.reviewCount > 0)
+                if (business.reviewCount >
+                    0)
                   Text(
                     ' (${business.reviewCount})',
                   ),
@@ -1126,10 +1191,9 @@ class BusinessCard
                       ? 'Open'
                       : 'Closed',
                   style: TextStyle(
-                    color:
-                        business.openNow
-                            ? Colors.green
-                            : Colors.red,
+                    color: business.openNow
+                        ? Colors.green
+                        : Colors.red,
                     fontWeight:
                         FontWeight.w600,
                   ),
@@ -1138,7 +1202,6 @@ class BusinessCard
             ),
           ],
         ),
-        isThreeLine: true,
         trailing: IconButton(
           icon: Icon(
             isFavorite
@@ -1166,9 +1229,9 @@ class BusinessCard
   }
 }
 
-// ============================================================
-// BUSINESS PROFILE
-// ============================================================
+/* ============================================================
+   BUSINESS DETAILS
+============================================================ */
 
 class BusinessDetailsPage
     extends StatelessWidget {
@@ -1182,7 +1245,7 @@ class BusinessDetailsPage
   Future<void> callBusiness(
     BuildContext context,
   ) async {
-    if (business.phone.trim().isEmpty) {
+    if (business.phone.isEmpty) {
       showMessage(
         context,
         'Phone number is not available.',
@@ -1190,40 +1253,31 @@ class BusinessDetailsPage
       return;
     }
 
-    final uri = Uri(
-      scheme: 'tel',
-      path: business.phone.trim(),
-    );
+    final uri =
+        Uri.parse('tel:${business.phone}');
 
     try {
       final launched =
-          await launchUrl(
-        uri,
-        mode:
-            LaunchMode.externalApplication,
-      );
+          await launchUrl(uri);
 
-      if (!launched &&
-          context.mounted) {
+      if (!launched) {
         showMessage(
           context,
           'Could not open phone dialer.',
         );
       }
     } catch (_) {
-      if (context.mounted) {
-        showMessage(
-          context,
-          'Could not open phone dialer.',
-        );
-      }
+      showMessage(
+        context,
+        'Could not open phone dialer.',
+      );
     }
   }
 
   Future<void> openWhatsApp(
     BuildContext context,
   ) async {
-    if (business.phone.trim().isEmpty) {
+    if (business.phone.isEmpty) {
       showMessage(
         context,
         'WhatsApp number is not available.',
@@ -1231,31 +1285,24 @@ class BusinessDetailsPage
       return;
     }
 
-    String phone =
+    final phone =
         business.phone.replaceAll(
-      RegExp(r'[^0-9+]'),
+      RegExp(r'[^0-9]'),
       '',
     );
-
-    if (phone.startsWith('+')) {
-      phone = phone.substring(1);
-    }
 
     if (phone.isEmpty) {
       showMessage(
         context,
-        'Invalid phone number.',
+        'Invalid international phone number.',
       );
       return;
     }
 
-    final message =
-        Uri.encodeComponent(
-      'Hello ${business.name}, I found your business on Local Business & Services.',
-    );
-
     final uri = Uri.parse(
-      'https://wa.me/$phone?text=$message',
+      'https://wa.me/$phone?text=${Uri.encodeComponent(
+        'Hello ${business.name}',
+      )}',
     );
 
     try {
@@ -1266,20 +1313,17 @@ class BusinessDetailsPage
             LaunchMode.externalApplication,
       );
 
-      if (!launched &&
-          context.mounted) {
+      if (!launched) {
         showMessage(
           context,
           'WhatsApp could not be opened.',
         );
       }
     } catch (_) {
-      if (context.mounted) {
-        showMessage(
-          context,
-          'WhatsApp could not be opened.',
-        );
-      }
+      showMessage(
+        context,
+        'WhatsApp could not be opened.',
+      );
     }
   }
 
@@ -1311,20 +1355,17 @@ class BusinessDetailsPage
             LaunchMode.externalApplication,
       );
 
-      if (!launched &&
-          context.mounted) {
+      if (!launched) {
         showMessage(
           context,
           'Google Maps could not be opened.',
         );
       }
     } catch (_) {
-      if (context.mounted) {
-        showMessage(
-          context,
-          'Google Maps could not be opened.',
-        );
-      }
+      showMessage(
+        context,
+        'Google Maps could not be opened.',
+      );
     }
   }
 
@@ -1334,15 +1375,14 @@ class BusinessDetailsPage
       appBar: AppBar(
         title:
             const Text('Business Profile'),
-        centerTitle: true,
       ),
       body: ListView(
         padding:
-            const EdgeInsets.all(18),
+            const EdgeInsets.all(20),
         children: [
           Container(
             padding:
-                const EdgeInsets.all(24),
+                const EdgeInsets.all(22),
             decoration: BoxDecoration(
               gradient:
                   const LinearGradient(
@@ -1352,21 +1392,21 @@ class BusinessDetailsPage
                 ],
               ),
               borderRadius:
-                  BorderRadius.circular(28),
+                  BorderRadius.circular(24),
             ),
             child: Column(
               children: [
                 const CircleAvatar(
-                  radius: 50,
+                  radius: 48,
                   backgroundColor:
                       Colors.white,
                   child: Icon(
-                    Icons.storefront,
-                    size: 52,
+                    Icons.business,
+                    size: 50,
                     color: Colors.blue,
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 14),
                 Text(
                   business.name,
                   textAlign:
@@ -1379,7 +1419,7 @@ class BusinessDetailsPage
                         FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 6),
                 Text(
                   business.category,
                   textAlign:
@@ -1387,17 +1427,7 @@ class BusinessDetailsPage
                   style:
                       const TextStyle(
                     color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  '⭐ ${business.rating.toStringAsFixed(1)}'
-                  ' • ${business.reviewCount} reviews',
-                  style:
-                      const TextStyle(
-                    color: Colors.white,
-                    fontWeight:
-                        FontWeight.w600,
+                    fontSize: 15,
                   ),
                 ),
               ],
@@ -1407,74 +1437,117 @@ class BusinessDetailsPage
           const SizedBox(height: 20),
 
           Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: profileAction(
-                  Icons.call,
-                  'Call',
-                  () =>
-                      callBusiness(context),
+              ActionButton(
+                icon: Icons.call,
+                title: 'Call',
+                onPressed: () =>
+                    callBusiness(
+                  context,
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: profileAction(
-                  Icons.chat,
-                  'WhatsApp',
-                  () =>
-                      openWhatsApp(context),
+              ActionButton(
+                icon: Icons.chat,
+                title: 'WhatsApp',
+                onPressed: () =>
+                    openWhatsApp(
+                  context,
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: profileAction(
-                  Icons.map,
-                  'Maps',
-                  () =>
-                      openMaps(context),
+              ActionButton(
+                icon: Icons.map,
+                title: 'Maps',
+                onPressed: () =>
+                    openMaps(
+                  context,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
+
+          Card(
+            child: Padding(
+              padding:
+                  const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  infoRow(
+                    Icons.location_on,
+                    'Address',
+                    business.address,
+                  ),
+                  infoRow(
+                    Icons.phone,
+                    'Phone',
+                    business.phone.isEmpty
+                        ? 'Not available'
+                        : business.phone,
+                  ),
+                  infoRow(
+                    Icons.access_time,
+                    'Opening Hours',
+                    business.openingHours.isEmpty
+                        ? 'Not provided'
+                        : business.openingHours,
+                  ),
+                  infoRow(
+                    business.openNow
+                        ? Icons.check_circle
+                        : Icons.info_outline,
+                    'Status',
+                    business.openNow
+                        ? 'Open now'
+                        : 'Currently closed',
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          if (business.description
+              .trim()
+              .isNotEmpty) ...[
+            const SizedBox(height: 20),
+            const Text(
+              'About This Business',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight:
+                    FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(16),
+                child: Text(
+                  business.description,
+                  style:
+                      const TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 20),
 
           const Text(
-            'Business Information',
+            'Ratings & Reviews',
             style: TextStyle(
               fontSize: 21,
-              fontWeight:
-                  FontWeight.bold,
+              fontWeight: FontWeight.bold,
             ),
           ),
 
           const SizedBox(height: 10),
-
-          profileInfo(
-            Icons.location_on,
-            'Address',
-            business.address,
-          ),
-
-          profileInfo(
-            Icons.phone,
-            'Phone',
-            business.phone.isEmpty
-                ? 'Phone unavailable'
-                : business.phone,
-          ),
-
-          profileInfo(
-            business.openNow
-                ? Icons.check_circle
-                : Icons.cancel,
-            'Status',
-            business.openNow
-                ? 'Open now'
-                : 'Currently closed',
-          ),
-
-          const SizedBox(height: 20),
 
           Card(
             child: ListTile(
@@ -1491,97 +1564,117 @@ class BusinessDetailsPage
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          OutlinedButton.icon(
-            onPressed: () {
-              showMessage(
-                context,
-                'Review feature will be connected in the next stage.',
-              );
-            },
-            icon: const Icon(
-              Icons.rate_review,
-            ),
-            label: const Text(
-              'Write a Review',
+          SizedBox(
+            height: 50,
+            child:
+                OutlinedButton.icon(
+              onPressed: () {
+                showMessage(
+                  context,
+                  'Review feature will be connected to the backend in the next stage.',
+                );
+              },
+              icon: const Icon(
+                Icons.rate_review,
+              ),
+              label: const Text(
+                'Write a Review',
+              ),
             ),
           ),
-
-          const SizedBox(height: 30),
         ],
       ),
     );
   }
 
-  Widget profileAction(
-    IconData icon,
-    String title,
-    VoidCallback action,
-  ) {
-    return ElevatedButton(
-      onPressed: action,
-      style:
-          ElevatedButton.styleFrom(
-        padding:
-            const EdgeInsets.symmetric(
-          vertical: 14,
-        ),
-        shape:
-            RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(16),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(icon),
-          const SizedBox(height: 5),
-          Text(title),
-        ],
-      ),
-    );
-  }
-
-  Widget profileInfo(
+  Widget infoRow(
     IconData icon,
     String title,
     String value,
   ) {
-    return Card(
-      margin:
-          const EdgeInsets.only(
-        bottom: 10,
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 9,
       ),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: Colors.blue,
-        ),
-        title: Text(
-          title,
-          style:
-              const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+      child: Row(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: Colors.blue,
           ),
-        ),
-        subtitle: Text(
-          value,
-          style:
-              const TextStyle(
-            fontWeight:
-                FontWeight.w500,
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style:
+                      const TextStyle(
+                    fontSize: 15,
+                    fontWeight:
+                        FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-// ============================================================
-// FAVORITES
-// ============================================================
+/* ============================================================
+   ACTION BUTTON
+============================================================ */
+
+class ActionButton
+    extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onPressed;
+
+  const ActionButton({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IconButton.filled(
+          onPressed: onPressed,
+          icon: Icon(icon),
+        ),
+        const SizedBox(height: 4),
+        Text(title),
+      ],
+    );
+  }
+}
+
+/* ============================================================
+   FAVORITES
+============================================================ */
 
 class FavoritesPage
     extends StatelessWidget {
@@ -1601,13 +1694,32 @@ class FavoritesPage
         child: Padding(
           padding:
               EdgeInsets.all(25),
-          child: Text(
-            'No favorite businesses yet.\n\n'
-            'Tap ❤️ on a business to save it here.',
-            textAlign:
-                TextAlign.center,
-            style:
-                TextStyle(fontSize: 17),
+          child: Column(
+            mainAxisSize:
+                MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.favorite_border,
+                size: 70,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 15),
+              Text(
+                'No favorite businesses yet.',
+                textAlign:
+                    TextAlign.center,
+                style:
+                    TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Tap the ❤️ button on a business to save it here.',
+                textAlign:
+                    TextAlign.center,
+                style:
+                    TextStyle(color: Colors.grey),
+              ),
+            ],
           ),
         ),
       );
@@ -1633,33 +1745,40 @@ class FavoritesPage
   }
 }
 
-// ============================================================
-// ADD BUSINESS
-// ============================================================
+/* ============================================================
+   ADD BUSINESS
+============================================================ */
 
 class AddBusinessPage
     extends StatefulWidget {
-  const AddBusinessPage({
-    super.key,
-  });
+  const AddBusinessPage({super.key});
 
   @override
-  State<AddBusinessPage> createState() =>
-      _AddBusinessPageState();
+  State<AddBusinessPage>
+      createState() =>
+          _AddBusinessPageState();
 }
 
 class _AddBusinessPageState
     extends State<AddBusinessPage> {
   final nameController =
       TextEditingController();
+
   final categoryController =
       TextEditingController();
+
+  final countryCodeController =
+      TextEditingController();
+
   final phoneController =
       TextEditingController();
+
   final addressController =
       TextEditingController();
+
   final hoursController =
       TextEditingController();
+
   final descriptionController =
       TextEditingController();
 
@@ -1667,6 +1786,7 @@ class _AddBusinessPageState
   void dispose() {
     nameController.dispose();
     categoryController.dispose();
+    countryCodeController.dispose();
     phoneController.dispose();
     addressController.dispose();
     hoursController.dispose();
@@ -1674,27 +1794,78 @@ class _AddBusinessPageState
     super.dispose();
   }
 
-  void submit() {
-    if (nameController.text.trim().isEmpty ||
-        categoryController.text
-            .trim()
-            .isEmpty ||
-        phoneController.text
-            .trim()
-            .isEmpty ||
-        addressController.text
-            .trim()
-            .isEmpty) {
+  void submitBusiness() {
+    final name =
+        nameController.text.trim();
+    final category =
+        categoryController.text.trim();
+    final countryCode =
+        countryCodeController.text.trim();
+    final phone =
+        phoneController.text.trim();
+    final address =
+        addressController.text.trim();
+    final hours =
+        hoursController.text.trim();
+    final description =
+        descriptionController.text.trim();
+
+    if (name.isEmpty ||
+        category.isEmpty ||
+        phone.isEmpty ||
+        address.isEmpty) {
       showMessage(
         context,
-        'Please complete all required fields.',
+        'Please complete the required business information.',
       );
       return;
     }
 
-    showMessage(
+    String finalPhone = phone;
+
+    if (countryCode.isNotEmpty &&
+        !phone.startsWith('+')) {
+      final cleanCode =
+          countryCode.replaceAll(
+        RegExp(r'[^0-9+]'),
+        '',
+      );
+
+      final cleanPhone =
+          phone.replaceAll(
+        RegExp(r'[^0-9]'),
+        '',
+      );
+
+      if (cleanCode.isNotEmpty) {
+        finalPhone =
+            '$cleanCode$cleanPhone';
+      }
+    }
+
+    final business =
+        Business(
+      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+      name: name,
+      category: category,
+      address: address,
+      phone: finalPhone,
+      mapsUrl: '',
+      description: description,
+      openingHours: hours,
+      rating: 0,
+      reviewCount: 0,
+      openNow: false,
+    );
+
+    Navigator.pushReplacement(
       context,
-      'Business submitted successfully.',
+      MaterialPageRoute(
+        builder: (_) =>
+            BusinessDetailsPage(
+          business: business,
+        ),
+      ),
     );
   }
 
@@ -1703,7 +1874,7 @@ class _AddBusinessPageState
     return Scaffold(
       appBar: AppBar(
         title:
-            const Text('Add Your Business'),
+            const Text('List Your Business'),
       ),
       body: ListView(
         padding:
@@ -1712,92 +1883,153 @@ class _AddBusinessPageState
           const Text(
             'Create Your Business Profile',
             style: TextStyle(
-              fontSize: 23,
+              fontSize: 25,
               fontWeight:
                   FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Add your business information so customers can discover you.',
-            style:
-                TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 22),
 
-          field(
+          const SizedBox(height: 8),
+
+          const Text(
+            'Add your business information so customers can discover and contact you.',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 15,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          businessField(
             nameController,
             'Business Name',
             Icons.store,
           ),
-          field(
+
+          businessField(
             categoryController,
             'Business Category',
             Icons.category,
           ),
-          field(
-            phoneController,
-            'Phone Number',
-            Icons.phone,
-            keyboard:
-                TextInputType.phone,
+
+          Row(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 110,
+                child: businessField(
+                  countryCodeController,
+                  'Code',
+                  Icons.public,
+                  keyboard:
+                      TextInputType.phone,
+                  hint:
+                      '+92',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: businessField(
+                  phoneController,
+                  'Phone Number',
+                  Icons.phone,
+                  keyboard:
+                      TextInputType.phone,
+                  hint:
+                      '3001234567',
+                ),
+              ),
+            ],
           ),
-          field(
+
+          businessField(
             addressController,
             'Business Address',
             Icons.location_on,
           ),
-          field(
+
+          businessField(
             hoursController,
             'Opening Hours',
             Icons.access_time,
+            hint:
+                'Example: Mon-Sat, 10 AM - 8 PM',
           ),
-          field(
+
+          businessField(
             descriptionController,
             'Business Description',
             Icons.description,
-            maxLines: 4,
+            maxLines: 5,
+            hint:
+                'Tell customers about your business...',
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
-          OutlinedButton.icon(
-            onPressed: () {
-              showMessage(
-                context,
-                'Photo upload will be connected in the next stage.',
-              );
-            },
-            icon:
-                const Icon(Icons.photo),
-            label:
-                const Text('Add Business Photos'),
+          Container(
+            padding:
+                const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.blue
+                  .withValues(alpha: 0.06),
+              borderRadius:
+                  BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.blue
+                    .withValues(alpha: 0.15),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.photo_library_outlined,
+                  color: Colors.blue,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Business photos can be connected when the online storage/backend is added.',
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 20),
 
           SizedBox(
-            height: 52,
+            height: 54,
             child: ElevatedButton.icon(
-              onPressed: submit,
-              icon:
-                  const Icon(Icons.check),
+              onPressed:
+                  submitBusiness,
+              icon: const Icon(
+                Icons.check_circle_outline,
+              ),
               label: const Text(
-                'Submit Business',
+                'Create Business Profile',
+                style:
+                    TextStyle(fontSize: 16),
               ),
             ),
           ),
+
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
 
-  Widget field(
+  Widget businessField(
     TextEditingController controller,
     String label,
     IconData icon, {
     int maxLines = 1,
     TextInputType? keyboard,
+    String? hint,
   }) {
     return Padding(
       padding:
@@ -1811,13 +2043,16 @@ class _AddBusinessPageState
         decoration:
             InputDecoration(
           labelText: label,
+          hintText: hint,
           prefixIcon:
               Icon(icon),
+          filled: true,
+          fillColor: Colors.white,
           border:
               OutlineInputBorder(
             borderRadius:
                 BorderRadius.circular(
-              14,
+              15,
             ),
           ),
         ),
@@ -1826,9 +2061,9 @@ class _AddBusinessPageState
   }
 }
 
-// ============================================================
-// LOGIN
-// ============================================================
+/* ============================================================
+   LOGIN
+============================================================ */
 
 class LoginPage
     extends StatefulWidget {
@@ -1843,8 +2078,11 @@ class _LoginPageState
     extends State<LoginPage> {
   final emailController =
       TextEditingController();
+
   final passwordController =
       TextEditingController();
+
+  bool hidePassword = true;
 
   @override
   void dispose() {
@@ -1854,11 +2092,13 @@ class _LoginPageState
   }
 
   void login() {
-    if (emailController.text
-            .trim()
-            .isEmpty ||
-        passwordController.text
-            .isEmpty) {
+    final email =
+        emailController.text.trim();
+    final password =
+        passwordController.text;
+
+    if (email.isEmpty ||
+        password.isEmpty) {
       showMessage(
         context,
         'Please enter your email and password.',
@@ -1868,7 +2108,7 @@ class _LoginPageState
 
     showMessage(
       context,
-      'Login is ready for backend connection.',
+      'Login will be connected to the secure backend.',
     );
   }
 
@@ -1878,17 +2118,16 @@ class _LoginPageState
       appBar: AppBar(
         title:
             const Text('Welcome Back'),
-        centerTitle: true,
       ),
       body: ListView(
         padding:
-            const EdgeInsets.all(24),
+            const EdgeInsets.all(22),
         children: [
           const SizedBox(height: 20),
 
           Container(
             padding:
-                const EdgeInsets.all(22),
+                const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient:
                   const LinearGradient(
@@ -1902,29 +2141,34 @@ class _LoginPageState
             ),
             child: const Column(
               children: [
-                Icon(
-                  Icons.business_center,
-                  size: 70,
-                  color: Colors.white,
+                CircleAvatar(
+                  radius: 42,
+                  backgroundColor:
+                      Colors.white,
+                  child: Icon(
+                    Icons.business_center,
+                    size: 42,
+                    color: Colors.blue,
+                  ),
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: 15),
                 Text(
                   'Local Business & Services',
                   textAlign:
                       TextAlign.center,
-                  style:
-                      TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight:
                         FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 5),
+                SizedBox(height: 6),
                 Text(
-                  'Connect. Discover. Grow.',
-                  style:
-                      TextStyle(
+                  'Sign in to manage your account and businesses.',
+                  textAlign:
+                      TextAlign.center,
+                  style: TextStyle(
                     color: Colors.white70,
                   ),
                 ),
@@ -1932,7 +2176,7 @@ class _LoginPageState
             ),
           ),
 
-          const SizedBox(height: 25),
+          const SizedBox(height: 28),
 
           TextField(
             controller:
@@ -1940,12 +2184,19 @@ class _LoginPageState
             keyboardType:
                 TextInputType.emailAddress,
             decoration:
-                const InputDecoration(
+                InputDecoration(
               labelText: 'Email Address',
               prefixIcon:
-                  Icon(Icons.email),
+                  const Icon(
+                Icons.email_outlined,
+              ),
               border:
-                  OutlineInputBorder(),
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
             ),
           ),
 
@@ -1954,25 +2205,47 @@ class _LoginPageState
           TextField(
             controller:
                 passwordController,
-            obscureText: true,
+            obscureText: hidePassword,
             decoration:
-                const InputDecoration(
+                InputDecoration(
               labelText: 'Password',
               prefixIcon:
-                  Icon(Icons.lock),
+                  const Icon(
+                Icons.lock_outline,
+              ),
+              suffixIcon:
+                  IconButton(
+                icon: Icon(
+                  hidePassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    hidePassword =
+                        !hidePassword;
+                  });
+                },
+              ),
               border:
-                  OutlineInputBorder(),
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
           SizedBox(
-            height: 52,
-            child: ElevatedButton(
+            height: 54,
+            child:
+                ElevatedButton(
               onPressed: login,
               child: const Text(
-                'Login',
+                'Sign In',
                 style:
                     TextStyle(fontSize: 16),
               ),
@@ -1981,18 +2254,20 @@ class _LoginPageState
 
           const SizedBox(height: 10),
 
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const SignupPage(),
-                ),
-              );
-            },
-            child: const Text(
-              'Create a New Account',
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const SignupPage(),
+                  ),
+                );
+              },
+              child: const Text(
+                'New here? Create an account',
+              ),
             ),
           ),
         ],
@@ -2001,9 +2276,9 @@ class _LoginPageState
   }
 }
 
-// ============================================================
-// SIGN UP
-// ============================================================
+/* ============================================================
+   SIGN UP
+============================================================ */
 
 class SignupPage
     extends StatefulWidget {
@@ -2018,28 +2293,42 @@ class _SignupPageState
     extends State<SignupPage> {
   final nameController =
       TextEditingController();
+
   final emailController =
       TextEditingController();
+
   final passwordController =
       TextEditingController();
+
+  final confirmController =
+      TextEditingController();
+
+  bool hidePassword = true;
+  bool hideConfirm = true;
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmController.dispose();
     super.dispose();
   }
 
-  void signup() {
-    if (nameController.text
-            .trim()
-            .isEmpty ||
-        emailController.text
-            .trim()
-            .isEmpty ||
-        passwordController.text
-            .isEmpty) {
+  void createAccount() {
+    final name =
+        nameController.text.trim();
+    final email =
+        emailController.text.trim();
+    final password =
+        passwordController.text;
+    final confirm =
+        confirmController.text;
+
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirm.isEmpty) {
       showMessage(
         context,
         'Please complete all fields.',
@@ -2047,9 +2336,25 @@ class _SignupPageState
       return;
     }
 
+    if (password != confirm) {
+      showMessage(
+        context,
+        'Passwords do not match.',
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage(
+        context,
+        'Password must contain at least 6 characters.',
+      );
+      return;
+    }
+
     showMessage(
       context,
-      'Account form is ready for backend connection.',
+      'Account details are ready for secure backend connection.',
     );
   }
 
@@ -2058,27 +2363,18 @@ class _SignupPageState
     return Scaffold(
       appBar: AppBar(
         title:
-            const Text('Create Account'),
-        centerTitle: true,
+            const Text('Create Your Account'),
       ),
       body: ListView(
         padding:
-            const EdgeInsets.all(24),
+            const EdgeInsets.all(22),
         children: [
-          const Icon(
-            Icons.person_add_alt_1,
-            size: 90,
-            color: Colors.blue,
-          ),
-
           const SizedBox(height: 15),
 
           const Text(
             'Join Local Business & Services',
-            textAlign:
-                TextAlign.center,
             style: TextStyle(
-              fontSize: 23,
+              fontSize: 25,
               fontWeight:
                   FontWeight.bold,
             ),
@@ -2087,11 +2383,11 @@ class _SignupPageState
           const SizedBox(height: 8),
 
           const Text(
-            'Create your account and discover businesses anywhere.',
-            textAlign:
-                TextAlign.center,
-            style:
-                TextStyle(color: Colors.grey),
+            'Create your account to discover businesses or manage your own business profile.',
+            style: TextStyle(
+              color: Colors.grey,
+              height: 1.4,
+            ),
           ),
 
           const SizedBox(height: 25),
@@ -2100,12 +2396,19 @@ class _SignupPageState
             controller:
                 nameController,
             decoration:
-                const InputDecoration(
+                InputDecoration(
               labelText: 'Full Name',
               prefixIcon:
-                  Icon(Icons.person),
+                  const Icon(
+                Icons.person_outline,
+              ),
               border:
-                  OutlineInputBorder(),
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
             ),
           ),
 
@@ -2117,12 +2420,19 @@ class _SignupPageState
             keyboardType:
                 TextInputType.emailAddress,
             decoration:
-                const InputDecoration(
+                InputDecoration(
               labelText: 'Email Address',
               prefixIcon:
-                  Icon(Icons.email),
+                  const Icon(
+                Icons.email_outlined,
+              ),
               border:
-                  OutlineInputBorder(),
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
             ),
           ),
 
@@ -2131,25 +2441,101 @@ class _SignupPageState
           TextField(
             controller:
                 passwordController,
-            obscureText: true,
+            obscureText: hidePassword,
             decoration:
-                const InputDecoration(
+                InputDecoration(
               labelText: 'Password',
               prefixIcon:
-                  Icon(Icons.lock),
+                  const Icon(
+                Icons.lock_outline,
+              ),
+              suffixIcon:
+                  IconButton(
+                icon: Icon(
+                  hidePassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    hidePassword =
+                        !hidePassword;
+                  });
+                },
+              ),
               border:
-                  OutlineInputBorder(),
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
+
+          TextField(
+            controller:
+                confirmController,
+            obscureText: hideConfirm,
+            decoration:
+                InputDecoration(
+              labelText:
+                  'Confirm Password',
+              prefixIcon:
+                  const Icon(
+                Icons.verified_user_outlined,
+              ),
+              suffixIcon:
+                  IconButton(
+                icon: Icon(
+                  hideConfirm
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    hideConfirm =
+                        !hideConfirm;
+                  });
+                },
+              ),
+              border:
+                  OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  15,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
 
           SizedBox(
-            height: 52,
-            child: ElevatedButton(
-              onPressed: signup,
-              child:
-                  const Text('Create Account'),
+            height: 54,
+            child:
+                ElevatedButton(
+              onPressed:
+                  createAccount,
+              child: const Text(
+                'Create Account',
+                style:
+                    TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            'Your account will be connected to a secure backend when authentication is added.',
+            textAlign:
+                TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
             ),
           ),
         ],
@@ -2158,9 +2544,9 @@ class _SignupPageState
   }
 }
 
-// ============================================================
-// NOTIFICATIONS
-// ============================================================
+/* ============================================================
+   NOTIFICATIONS
+============================================================ */
 
 class NotificationsPage
     extends StatelessWidget {
@@ -2175,21 +2561,27 @@ class NotificationsPage
         title:
             const Text('Notifications'),
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment:
               MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.notifications_none,
               size: 80,
               color: Colors.grey,
             ),
-            SizedBox(height: 15),
-            Text(
+            const SizedBox(height: 15),
+            const Text(
               'No new notifications',
               style:
-                  TextStyle(fontSize: 17),
+                  TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'You are all caught up.',
+              style:
+                  TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -2198,9 +2590,9 @@ class NotificationsPage
   }
 }
 
-// ============================================================
-// MESSAGE HELPER
-// ============================================================
+/* ============================================================
+   MESSAGE HELPER
+============================================================ */
 
 void showMessage(
   BuildContext context,
@@ -2211,6 +2603,8 @@ void showMessage(
     ..showSnackBar(
       SnackBar(
         content: Text(message),
+        behavior:
+            SnackBarBehavior.floating,
       ),
     );
 }
