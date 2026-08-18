@@ -8,10 +8,6 @@ void main() {
   runApp(const LocalBusinessServicesApp());
 }
 
-// ============================================================
-// APP
-// ============================================================
-
 class LocalBusinessServicesApp extends StatelessWidget {
   const LocalBusinessServicesApp({super.key});
 
@@ -30,9 +26,9 @@ class LocalBusinessServicesApp extends StatelessWidget {
   }
 }
 
-// ============================================================
-// BUSINESS MODEL
-// ============================================================
+/* ============================================================
+   MODEL
+============================================================ */
 
 class Business {
   final String id;
@@ -58,9 +54,9 @@ class Business {
   });
 }
 
-// ============================================================
-// HOME PAGE
-// ============================================================
+/* ============================================================
+   HOME
+============================================================ */
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,40 +67,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
-
   final List<Business> favorites = [];
+
+  bool isFavorite(Business business) {
+    return favorites.any((b) => b.id == business.id);
+  }
 
   void toggleFavorite(Business business) {
     setState(() {
-      final exists = favorites.any((item) => item.id == business.id);
-
-      if (exists) {
-        favorites.removeWhere((item) => item.id == business.id);
+      if (isFavorite(business)) {
+        favorites.removeWhere((b) => b.id == business.id);
       } else {
         favorites.add(business);
       }
     });
   }
 
-  bool isFavorite(Business business) {
-    return favorites.any((item) => item.id == business.id);
-  }
-
   @override
   Widget build(BuildContext context) {
     final pages = [
       HomeTab(
-        favorites: favorites,
         isFavorite: isFavorite,
         onFavorite: toggleFavorite,
       ),
       SearchPage(
-        favorites: favorites,
         isFavorite: isFavorite,
         onFavorite: toggleFavorite,
       ),
       NearbyPage(
-        favorites: favorites,
         isFavorite: isFavorite,
         onFavorite: toggleFavorite,
       ),
@@ -122,7 +112,6 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Notifications',
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
               Navigator.push(
@@ -134,7 +123,6 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
-            tooltip: 'Account',
             icon: const Icon(Icons.person_outline),
             onPressed: () {
               Navigator.push(
@@ -194,18 +182,16 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ============================================================
-// HOME TAB
-// ============================================================
+/* ============================================================
+   HOME TAB
+============================================================ */
 
 class HomeTab extends StatelessWidget {
-  final List<Business> favorites;
   final bool Function(Business) isFavorite;
   final void Function(Business) onFavorite;
 
   const HomeTab({
     super.key,
-    required this.favorites,
     required this.isFavorite,
     required this.onFavorite,
   });
@@ -219,10 +205,7 @@ class HomeTab extends StatelessWidget {
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [
-                Colors.blue,
-                Colors.indigo,
-              ],
+              colors: [Colors.blue, Colors.indigo],
             ),
             borderRadius: BorderRadius.circular(22),
           ),
@@ -239,7 +222,7 @@ class HomeTab extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                'Search real businesses and services near any location.',
+                'Find businesses, services, shops and more.',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 15,
@@ -262,10 +245,7 @@ class HomeTab extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 17,
-            ),
+            padding: const EdgeInsets.all(17),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -279,14 +259,17 @@ class HomeTab extends StatelessWidget {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Search businesses, services or locations...',
+                    'Search businesses or services...',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 15,
                     ),
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, size: 16),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                ),
               ],
             ),
           ),
@@ -309,42 +292,42 @@ class HomeTab extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              category(
+              _category(
                 context,
                 Icons.restaurant,
                 'Restaurants',
               ),
-              category(
+              _category(
                 context,
                 Icons.local_hospital,
                 'Doctors',
               ),
-              category(
+              _category(
                 context,
                 Icons.electrical_services,
                 'Electrician',
               ),
-              category(
+              _category(
                 context,
                 Icons.plumbing,
                 'Plumber',
               ),
-              category(
+              _category(
                 context,
                 Icons.car_repair,
                 'Mechanic',
               ),
-              category(
+              _category(
                 context,
                 Icons.store,
                 'Shops',
               ),
-              category(
+              _category(
                 context,
                 Icons.school,
                 'Schools',
               ),
-              category(
+              _category(
                 context,
                 Icons.hotel,
                 'Hotels',
@@ -356,7 +339,7 @@ class HomeTab extends StatelessWidget {
         const SizedBox(height: 25),
 
         const Text(
-          'How it works',
+          'Quick Access',
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.bold,
@@ -365,22 +348,31 @@ class HomeTab extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        const InfoCard(
-          icon: Icons.search,
-          title: 'Search',
-          text: 'Search real businesses using Google Places.',
+        _quickCard(
+          context,
+          Icons.search,
+          'Search Businesses',
+          'Find real businesses using Google Places.',
+          const SearchPage(),
         ),
 
-        const InfoCard(
-          icon: Icons.phone,
-          title: 'Contact',
-          text: 'Call or contact a business through WhatsApp.',
+        _quickCard(
+          context,
+          Icons.location_on,
+          'Nearby',
+          'Find services around your area.',
+          const NearbyPage(),
         ),
 
-        const InfoCard(
-          icon: Icons.map,
-          title: 'Find on Maps',
-          text: 'Open the business location directly in Google Maps.',
+        _quickCard(
+          context,
+          Icons.favorite,
+          'Favorites',
+          'Save businesses for quick access.',
+          const FavoritesPage(
+            favorites: [],
+            onFavorite: _emptyFavorite,
+          ),
         ),
 
         const SizedBox(height: 100),
@@ -388,7 +380,9 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget category(
+  static void _emptyFavorite(Business business) {}
+
+  Widget _category(
     BuildContext context,
     IconData icon,
     String title,
@@ -437,139 +431,126 @@ class HomeTab extends StatelessWidget {
       ),
     );
   }
+
+  Widget _quickCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String text,
+    Widget page,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: CircleAvatar(
+          child: Icon(icon),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(text),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => page,
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
-// ============================================================
-// SEARCH PAGE
-// ============================================================
+/* ============================================================
+   PLACES SERVICE
+============================================================ */
 
-class SearchPage extends StatefulWidget {
-  final List<Business> favorites;
-  final bool Function(Business) isFavorite;
-  final void Function(Business) onFavorite;
-
-  const SearchPage({
-    super.key,
-    this.favorites = const [],
-    this.isFavorite = _falseFavorite,
-    this.onFavorite = _emptyFavorite,
-  });
-
-  static bool _falseFavorite(Business business) => false;
-
-  static void _emptyFavorite(Business business) {}
-
-  @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  final TextEditingController controller =
-      TextEditingController();
-
-  List<Business> results = [];
-
-  bool loading = false;
-  bool loadingMore = false;
-
-  String error = '';
-
-  String? nextPageToken;
-
-  // API key is supplied through:
-  // --dart-define=GOOGLE_PLACES_API_KEY=YOUR_KEY
+class PlacesService {
   static const String apiKey = String.fromEnvironment(
     'GOOGLE_PLACES_API_KEY',
   );
 
-  Future<List<Business>> requestPlaces({
-    String? pageToken,
-  }) async {
+  static Future<List<Business>> search(
+    String query,
+  ) async {
     if (apiKey.isEmpty) {
       throw Exception(
         'Google Places API key is missing.',
       );
     }
 
-    final uri = Uri.parse(
-      'https://places.googleapis.com/v1/places:searchText',
-    );
-
-    final body = <String, dynamic>{
-      'textQuery': controller.text.trim(),
-      'pageSize': 20,
-    };
-
-    if (pageToken != null && pageToken.isNotEmpty) {
-      body['pageToken'] = pageToken;
-    }
-
     final response = await http.post(
-      uri,
+      Uri.parse(
+        'https://places.googleapis.com/v1/places:searchText',
+      ),
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': apiKey,
         'X-Goog-FieldMask':
-            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours,nextPageToken',
+            'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
       },
-      body: jsonEncode(body),
+      body: jsonEncode({
+        'textQuery': query,
+        'pageSize': 20,
+      }),
     );
 
     if (response.statusCode != 200) {
-      String message = 'Places API error';
+      String message =
+          'Places API error (${response.statusCode})';
 
       try {
-        final decoded = jsonDecode(response.body);
+        final data = jsonDecode(response.body);
 
-        if (decoded is Map &&
-            decoded['error'] is Map &&
-            decoded['error']['message'] != null) {
+        if (data is Map &&
+            data['error'] is Map &&
+            data['error']['message'] != null) {
           message =
-              decoded['error']['message'].toString();
+              data['error']['message'].toString();
         }
       } catch (_) {}
 
-      throw Exception(
-        '$message (${response.statusCode})',
-      );
+      throw Exception(message);
     }
 
-    final decoded = jsonDecode(response.body);
-
-    final places = decoded['places'];
+    final data = jsonDecode(response.body);
+    final places = data['places'];
 
     if (places is! List) {
-      nextPageToken = null;
       return [];
     }
-
-    nextPageToken =
-        decoded['nextPageToken']?.toString();
 
     return places.map<Business>((place) {
       final displayName = place['displayName'];
 
       final name = displayName is Map
-          ? (displayName['text'] ??
-                  'Unknown Business')
+          ? (displayName['text'] ?? 'Unknown Business')
               .toString()
           : 'Unknown Business';
 
+      final category =
+          (place['primaryType'] ?? 'Business')
+              .toString()
+              .replaceAll('_', ' ');
+
       final address =
-          place['formattedAddress']
-                  ?.toString() ??
+          place['formattedAddress']?.toString() ??
               'Address unavailable';
 
-      final category =
-          place['primaryType']
-                  ?.toString()
-                  .replaceAll('_', ' ') ??
-              'Business';
-
       final phone =
-          place['nationalPhoneNumber']
-                  ?.toString() ??
+          place['nationalPhoneNumber']?.toString() ??
               '';
+
+      final mapsUrl =
+          place['googleMapsUri']?.toString() ?? '';
 
       final ratingValue = place['rating'];
 
@@ -584,22 +565,14 @@ class _SearchPageState extends State<SearchPage> {
           ? reviewValue.toInt()
           : 0;
 
-      final mapsUrl =
-          place['googleMapsUri']
-                  ?.toString() ??
-              '';
-
       bool openNow = false;
 
       final opening =
           place['currentOpeningHours'];
 
-      if (opening is Map) {
-        final value = opening['openNow'];
-
-        if (value is bool) {
-          openNow = value;
-        }
+      if (opening is Map &&
+          opening['openNow'] is bool) {
+        openNow = opening['openNow'];
       }
 
       return Business(
@@ -615,6 +588,38 @@ class _SearchPageState extends State<SearchPage> {
       );
     }).toList();
   }
+}
+
+/* ============================================================
+   SEARCH
+============================================================ */
+
+class SearchPage extends StatefulWidget {
+  final bool Function(Business) isFavorite;
+  final void Function(Business) onFavorite;
+
+  const SearchPage({
+    super.key,
+    this.isFavorite = _defaultFavorite,
+    this.onFavorite = _defaultOnFavorite,
+  });
+
+  static bool _defaultFavorite(Business business) {
+    return false;
+  }
+
+  static void _defaultOnFavorite(Business business) {}
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final controller = TextEditingController();
+
+  List<Business> results = [];
+  bool loading = false;
+  String error = '';
 
   Future<void> search() async {
     final query = controller.text.trim();
@@ -623,7 +628,6 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {
         results = [];
         error = '';
-        nextPageToken = null;
       });
       return;
     }
@@ -632,19 +636,18 @@ class _SearchPageState extends State<SearchPage> {
       loading = true;
       error = '';
       results = [];
-      nextPageToken = null;
     });
 
     try {
-      final firstPage = await requestPlaces();
+      final data = await PlacesService.search(query);
 
       if (!mounted) return;
 
       setState(() {
-        results = firstPage;
+        results = data;
         loading = false;
 
-        if (firstPage.isEmpty) {
+        if (data.isEmpty) {
           error = 'No businesses found.';
         }
       });
@@ -653,52 +656,10 @@ class _SearchPageState extends State<SearchPage> {
 
       setState(() {
         loading = false;
-        results = [];
         error = e.toString().replaceFirst(
               'Exception: ',
               '',
             );
-      });
-    }
-  }
-
-  Future<void> loadMore() async {
-    if (loadingMore ||
-        nextPageToken == null ||
-        nextPageToken!.isEmpty) {
-      return;
-    }
-
-    setState(() {
-      loadingMore = true;
-    });
-
-    try {
-      final oldToken = nextPageToken;
-
-      final moreResults = await requestPlaces(
-        pageToken: oldToken,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        final existingIds =
-            results.map((e) => e.id).toSet();
-
-        results.addAll(
-          moreResults.where(
-            (item) => !existingIds.contains(item.id),
-          ),
-        );
-
-        loadingMore = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-
-      setState(() {
-        loadingMore = false;
       });
     }
   }
@@ -718,12 +679,7 @@ class _SearchPageState extends State<SearchPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              16,
-              16,
-              8,
-            ),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: controller,
               textInputAction: TextInputAction.search,
@@ -750,8 +706,7 @@ class _SearchPageState extends State<SearchPage> {
           Expanded(
             child: loading
                 ? const Center(
-                    child:
-                        CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   )
                 : error.isNotEmpty
                     ? Center(
@@ -771,65 +726,27 @@ class _SearchPageState extends State<SearchPage> {
                               'Search for a business or service.',
                             ),
                           )
-                        : NotificationListener<
-                            ScrollNotification>(
-                            onNotification:
-                                (notification) {
-                              if (notification
-                                  is ScrollEndNotification) {
-                                final metrics =
-                                    notification.metrics;
+                        : ListView.builder(
+                            padding:
+                                const EdgeInsets.all(16),
+                            itemCount: results.length,
+                            itemBuilder:
+                                (context, index) {
+                              final business =
+                                  results[index];
 
-                                if (metrics.pixels >=
-                                    metrics.maxScrollExtent -
-                                        300) {
-                                  loadMore();
-                                }
-                              }
-
-                              return false;
+                              return BusinessCard(
+                                business: business,
+                                isFavorite:
+                                    widget.isFavorite(
+                                  business,
+                                ),
+                                onFavorite: () =>
+                                    widget.onFavorite(
+                                  business,
+                                ),
+                              );
                             },
-                            child: ListView.builder(
-                              padding:
-                                  const EdgeInsets.all(
-                                      16),
-                              itemCount:
-                                  results.length +
-                                      (loadingMore
-                                          ? 1
-                                          : 0),
-                              itemBuilder:
-                                  (context, index) {
-                                if (index >=
-                                    results.length) {
-                                  return const Padding(
-                                    padding:
-                                        EdgeInsets.all(
-                                            20),
-                                    child: Center(
-                                      child:
-                                          CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-
-                                final business =
-                                    results[index];
-
-                                return BusinessCard(
-                                  business:
-                                      business,
-                                  isFavorite:
-                                      widget.isFavorite(
-                                    business,
-                                  ),
-                                  onFavorite: () =>
-                                      widget.onFavorite(
-                                    business,
-                                  ),
-                                );
-                              },
-                            ),
                           ),
           ),
         ],
@@ -838,20 +755,18 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// ============================================================
-// NEARBY PAGE
-// ============================================================
+/* ============================================================
+   NEARBY
+============================================================ */
 
 class NearbyPage extends StatefulWidget {
-  final List<Business> favorites;
   final bool Function(Business) isFavorite;
   final void Function(Business) onFavorite;
 
   const NearbyPage({
     super.key,
-    required this.favorites,
-    required this.isFavorite,
-    required this.onFavorite,
+    this.isFavorite = SearchPage._defaultFavorite,
+    this.onFavorite = SearchPage._defaultOnFavorite,
   });
 
   @override
@@ -859,138 +774,55 @@ class NearbyPage extends StatefulWidget {
 }
 
 class _NearbyPageState extends State<NearbyPage> {
-  final TextEditingController locationController =
-      TextEditingController();
+  final locationController = TextEditingController();
 
   List<Business> results = [];
   bool loading = false;
+  String error = '';
 
-  static const String apiKey = String.fromEnvironment(
-    'GOOGLE_PLACES_API_KEY',
-  );
-
-  Future<void> searchNearby() async {
+  Future<void> findNearby() async {
     final location =
         locationController.text.trim();
 
     if (location.isEmpty) {
-      showMessage(
-        context,
-        'Enter a city or area first.',
-      );
+      setState(() {
+        error = 'Enter a city or area first.';
+        results = [];
+      });
       return;
     }
 
     setState(() {
       loading = true;
+      error = '';
       results = [];
     });
 
     try {
-      final uri = Uri.parse(
-        'https://places.googleapis.com/v1/places:searchText',
+      final data = await PlacesService.search(
+        'businesses and services near $location',
       );
-
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask':
-              'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
-        },
-        body: jsonEncode({
-          'textQuery':
-              'businesses and services in $location',
-          'pageSize': 20,
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Nearby search failed.');
-      }
-
-      final data = jsonDecode(response.body);
-
-      final places =
-          data['places'] as List? ?? [];
-
-      final converted =
-          places.map<Business>((place) {
-        final displayName =
-            place['displayName'];
-
-        final name = displayName is Map
-            ? (displayName['text'] ??
-                    'Unknown Business')
-                .toString()
-            : 'Unknown Business';
-
-        final address =
-            place['formattedAddress']
-                    ?.toString() ??
-                'Address unavailable';
-
-        final category =
-            place['primaryType']
-                    ?.toString()
-                    .replaceAll('_', ' ') ??
-                'Business';
-
-        final phone =
-            place['nationalPhoneNumber']
-                    ?.toString() ??
-                '';
-
-        final ratingValue =
-            place['rating'];
-
-        final rating = ratingValue is num
-            ? ratingValue.toDouble()
-            : 0.0;
-
-        final reviewValue =
-            place['userRatingCount'];
-
-        final reviewCount =
-            reviewValue is num
-                ? reviewValue.toInt()
-                : 0;
-
-        return Business(
-          id: place['id']?.toString() ??
-              name,
-          name: name,
-          category: category,
-          address: address,
-          phone: phone,
-          mapsUrl:
-              place['googleMapsUri']
-                      ?.toString() ??
-                  '',
-          rating: rating,
-          reviewCount: reviewCount,
-          openNow: false,
-        );
-      }).toList();
 
       if (!mounted) return;
 
       setState(() {
-        results = converted;
+        results = data;
         loading = false;
+
+        if (data.isEmpty) {
+          error = 'No businesses found nearby.';
+        }
       });
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
         loading = false;
+        error = e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            );
       });
-
-      showMessage(
-        context,
-        'Could not load nearby businesses.',
-      );
     }
   }
 
@@ -1003,95 +835,86 @@ class _NearbyPageState extends State<NearbyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller:
-                          locationController,
-                      textInputAction:
-                          TextInputAction.search,
-                      onSubmitted: (_) =>
-                          searchNearby(),
-                      decoration: InputDecoration(
-                        hintText:
-                            'Enter city / area',
-                        prefixIcon:
-                            const Icon(
-                          Icons.location_on,
-                        ),
-                        border:
-                            OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(
-                            15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: searchNearby,
-                    icon:
-                        const Icon(Icons.search),
-                  ),
-                ],
+      appBar: AppBar(
+        title: const Text('Nearby Businesses'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: locationController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => findNearby(),
+              decoration: InputDecoration(
+                hintText: 'Enter city or area...',
+                prefixIcon:
+                    const Icon(Icons.location_on),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: findNearby,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(16),
+                ),
               ),
             ),
+          ),
 
-            Expanded(
-              child: loading
-                  ? const Center(
-                      child:
-                          CircularProgressIndicator(),
-                    )
-                  : results.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Enter an area to find businesses.',
-                          ),
-                        )
-                      : ListView.builder(
-                          padding:
-                              const EdgeInsets.all(
-                                  16),
-                          itemCount:
-                              results.length,
-                          itemBuilder:
-                              (context, index) {
-                            final business =
-                                results[index];
-
-                            return BusinessCard(
-                              business: business,
-                              isFavorite:
-                                  widget.isFavorite(
-                                business,
-                              ),
-                              onFavorite: () =>
-                                  widget.onFavorite(
-                                business,
-                              ),
-                            );
-                          },
+          Expanded(
+            child: loading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : error.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          error,
+                          textAlign:
+                              TextAlign.center,
                         ),
-            ),
-          ],
-        ),
+                      )
+                    : results.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'Enter an area to find nearby businesses.',
+                              textAlign:
+                                  TextAlign.center,
+                            ),
+                          )
+                        : ListView.builder(
+                            padding:
+                                const EdgeInsets.all(16),
+                            itemCount: results.length,
+                            itemBuilder:
+                                (context, index) {
+                              final business =
+                                  results[index];
+
+                              return BusinessCard(
+                                business: business,
+                                isFavorite:
+                                    widget.isFavorite(
+                                  business,
+                                ),
+                                onFavorite: () =>
+                                    widget.onFavorite(
+                                  business,
+                                ),
+                              );
+                            },
+                          ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ============================================================
-// CATEGORY SEARCH
-// ============================================================
+/* ============================================================
+   CATEGORY SEARCH
+============================================================ */
 
 class CategorySearchPage extends StatefulWidget {
   final String title;
@@ -1110,105 +933,39 @@ class _CategorySearchPageState
     extends State<CategorySearchPage> {
   List<Business> results = [];
   bool loading = true;
-
-  static const String apiKey = String.fromEnvironment(
-    'GOOGLE_PLACES_API_KEY',
-  );
+  String error = '';
 
   @override
   void initState() {
     super.initState();
-    searchCategory();
+    loadCategory();
   }
 
-  Future<void> searchCategory() async {
+  Future<void> loadCategory() async {
     try {
-      final response = await http.post(
-        Uri.parse(
-          'https://places.googleapis.com/v1/places:searchText',
-        ),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask':
-              'places.id,places.displayName,places.formattedAddress,places.primaryType,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.googleMapsUri,places.currentOpeningHours',
-        },
-        body: jsonEncode({
-          'textQuery':
-              '${widget.title} near me',
-          'pageSize': 20,
-        }),
+      final data = await PlacesService.search(
+        '${widget.title} near Rawalpindi Pakistan',
       );
 
-      if (response.statusCode != 200) {
-        throw Exception();
-      }
-
-      final data = jsonDecode(response.body);
-
-      final places =
-          data['places'] as List? ?? [];
-
-      final converted =
-          places.map<Business>((place) {
-        final displayName =
-            place['displayName'];
-
-        final name = displayName is Map
-            ? (displayName['text'] ??
-                    'Unknown Business')
-                .toString()
-            : 'Unknown Business';
-
-        final ratingValue =
-            place['rating'];
-
-        return Business(
-          id: place['id']?.toString() ??
-              name,
-          name: name,
-          category:
-              place['primaryType']
-                      ?.toString()
-                      .replaceAll('_', ' ') ??
-                  widget.title,
-          address:
-              place['formattedAddress']
-                      ?.toString() ??
-                  'Address unavailable',
-          phone:
-              place['nationalPhoneNumber']
-                      ?.toString() ??
-                  '',
-          mapsUrl:
-              place['googleMapsUri']
-                      ?.toString() ??
-                  '',
-          rating: ratingValue is num
-              ? ratingValue.toDouble()
-              : 0,
-          reviewCount:
-              place['userRatingCount']
-                      is num
-                  ? (place['userRatingCount']
-                          as num)
-                      .toInt()
-                  : 0,
-          openNow: false,
-        );
-      }).toList();
-
       if (!mounted) return;
 
       setState(() {
-        results = converted;
+        results = data;
         loading = false;
+
+        if (data.isEmpty) {
+          error = 'No businesses found.';
+        }
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
 
       setState(() {
         loading = false;
+        error = e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            );
       });
     }
   }
@@ -1221,21 +978,19 @@ class _CategorySearchPageState
       ),
       body: loading
           ? const Center(
-              child:
-                  CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             )
-          : results.isEmpty
-              ? const Center(
+          : error.isNotEmpty
+              ? Center(
                   child: Text(
-                    'No businesses found.',
+                    error,
+                    textAlign: TextAlign.center,
                   ),
                 )
               : ListView.builder(
-                  padding:
-                      const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   itemCount: results.length,
-                  itemBuilder:
-                      (context, index) {
+                  itemBuilder: (context, index) {
                     return BusinessCard(
                       business: results[index],
                     );
@@ -1245,9 +1000,9 @@ class _CategorySearchPageState
   }
 }
 
-// ============================================================
-// BUSINESS CARD
-// ============================================================
+/* ============================================================
+   BUSINESS CARD
+============================================================ */
 
 class BusinessCard extends StatelessWidget {
   final Business business;
@@ -1264,12 +1019,77 @@ class BusinessCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin:
-          const EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      child: InkWell(
-        borderRadius:
-            BorderRadius.circular(12),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.all(12),
+        leading: CircleAvatar(
+          radius: 28,
+          child: const Icon(
+            Icons.business,
+          ),
+        ),
+        title: Text(
+          business.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 5),
+            Text(business.category),
+            const SizedBox(height: 3),
+            Text(
+              '📍 ${business.address}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 3),
+            Row(
+              children: [
+                const Icon(
+                  Icons.star,
+                  size: 16,
+                  color: Colors.amber,
+                ),
+                Text(
+                  ' ${business.rating.toStringAsFixed(1)}',
+                ),
+                if (business.reviewCount > 0)
+                  Text(
+                    ' (${business.reviewCount})',
+                  ),
+                const SizedBox(width: 8),
+                Text(
+                  business.openNow
+                      ? 'Open'
+                      : 'Closed',
+                  style: TextStyle(
+                    color: business.openNow
+                        ? Colors.green
+                        : Colors.red,
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        isThreeLine: true,
+        trailing: IconButton(
+          icon: Icon(
+            isFavorite
+                ? Icons.favorite
+                : Icons.favorite_border,
+            color:
+                isFavorite ? Colors.red : null,
+          ),
+          onPressed: onFavorite,
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -1281,114 +1101,14 @@ class BusinessCard extends StatelessWidget {
             ),
           );
         },
-        child: Padding(
-          padding:
-              const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 28,
-                child:
-                    const Icon(Icons.business),
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      business.name,
-                      maxLines: 2,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      business.category,
-                      maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.blue,
-                      ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      business.address,
-                      maxLines: 2,
-                      overflow:
-                          TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          size: 18,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          business.rating > 0
-                              ? business.rating
-                                  .toStringAsFixed(
-                                      1)
-                              : 'No rating',
-                        ),
-                        if (business
-                                .reviewCount >
-                            0)
-                          Text(
-                            ' (${business.reviewCount})',
-                            style:
-                                const TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              IconButton(
-                icon: Icon(
-                  isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: isFavorite
-                      ? Colors.red
-                      : null,
-                ),
-                onPressed: onFavorite,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
 
-// ============================================================
-// BUSINESS DETAILS
-// ============================================================
+/* ============================================================
+   BUSINESS DETAILS
+============================================================ */
 
 class BusinessDetailsPage
     extends StatelessWidget {
@@ -1434,8 +1154,10 @@ class BusinessDetailsPage
       return;
     }
 
-    final phone = business.phone
-        .replaceAll(RegExp(r'[^0-9]'), '');
+    final phone = business.phone.replaceAll(
+      RegExp(r'[^0-9]'),
+      '',
+    );
 
     final uri = Uri.parse(
       'https://wa.me/$phone?text=${Uri.encodeComponent(
@@ -1465,7 +1187,8 @@ class BusinessDetailsPage
     if (business.mapsUrl.isNotEmpty) {
       uri = Uri.parse(business.mapsUrl);
     } else {
-      final query = Uri.encodeComponent(
+      final query =
+          Uri.encodeComponent(
         '${business.name}, ${business.address}',
       );
 
@@ -1494,31 +1217,19 @@ class BusinessDetailsPage
       appBar: AppBar(
         title:
             const Text('Business Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              showMessage(
-                context,
-                'Share option selected.',
-              );
-            },
-          ),
-        ],
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 55,
-            child: const Icon(
+            child: Icon(
               Icons.business,
               size: 55,
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 15),
 
           Text(
             business.name,
@@ -1529,13 +1240,13 @@ class BusinessDetailsPage
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 5),
 
           Text(
             business.category,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.blue,
+              color: Colors.grey,
               fontSize: 15,
             ),
           ),
@@ -1544,23 +1255,10 @@ class BusinessDetailsPage
 
           Center(
             child: Text(
-              business.rating > 0
-                  ? '⭐ ${business.rating.toStringAsFixed(1)}'
-                  : 'No rating',
-              style:
-                  const TextStyle(fontSize: 17),
+              '⭐ ${business.rating.toStringAsFixed(1)}'
+              '  (${business.reviewCount} reviews)',
             ),
           ),
-
-          if (business.reviewCount > 0)
-            Center(
-              child: Text(
-                '${business.reviewCount} reviews',
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
-              ),
-            ),
 
           const SizedBox(height: 25),
 
@@ -1568,52 +1266,48 @@ class BusinessDetailsPage
             mainAxisAlignment:
                 MainAxisAlignment.spaceEvenly,
             children: [
-              actionButton(
-                context,
-                Icons.call,
-                'Call',
-                () => callBusiness(context),
+              ActionButton(
+                icon: Icons.call,
+                title: 'Call',
+                onPressed: () =>
+                    callBusiness(context),
               ),
-              actionButton(
-                context,
-                Icons.chat,
-                'WhatsApp',
-                () => openWhatsApp(context),
+              ActionButton(
+                icon: Icons.chat,
+                title: 'WhatsApp',
+                onPressed: () =>
+                    openWhatsApp(context),
               ),
-              actionButton(
-                context,
-                Icons.map,
-                'Maps',
-                () => openMaps(context),
-              ),
-              actionButton(
-                context,
-                Icons.report_outlined,
-                'Report',
-                () => showMessage(
-                  context,
-                  'Report option selected.',
-                ),
+              ActionButton(
+                icon: Icons.map,
+                title: 'Maps',
+                onPressed: () =>
+                    openMaps(context),
               ),
             ],
           ),
 
           const SizedBox(height: 25),
 
-          infoTile(
-            Icons.location_on,
-            business.address,
+          InfoTile(
+            icon: Icons.location_on,
+            text: business.address,
           ),
 
-          if (business.phone.isNotEmpty)
-            infoTile(
-              Icons.phone,
-              business.phone,
-            ),
+          InfoTile(
+            icon: Icons.phone,
+            text: business.phone.isEmpty
+                ? 'Phone unavailable'
+                : business.phone,
+          ),
 
-          infoTile(
-            Icons.business,
-            business.category,
+          InfoTile(
+            icon: business.openNow
+                ? Icons.check_circle
+                : Icons.cancel,
+            text: business.openNow
+                ? 'Open now'
+                : 'Currently closed',
           ),
 
           const SizedBox(height: 25),
@@ -1621,12 +1315,12 @@ class BusinessDetailsPage
           const Text(
             'Reviews & Ratings',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 21,
               fontWeight: FontWeight.bold,
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
           Card(
             child: ListTile(
@@ -1634,29 +1328,26 @@ class BusinessDetailsPage
                   const CircleAvatar(
                 child: Icon(Icons.star),
               ),
-              title: const Text(
-                'Google rating',
+              title: Text(
+                '${business.rating.toStringAsFixed(1)} Rating',
               ),
               subtitle: Text(
-                business.rating > 0
-                    ? 'Rated ${business.rating.toStringAsFixed(1)} out of 5'
-                    : 'No rating available',
+                '${business.reviewCount} customer ratings',
               ),
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
 
           ElevatedButton.icon(
             onPressed: () {
               showMessage(
                 context,
-                'Review form will be connected here.',
+                'Review feature will be connected in the next stage.',
               );
             },
-            icon: const Icon(
-              Icons.rate_review,
-            ),
+            icon:
+                const Icon(Icons.rate_review),
             label:
                 const Text('Write a Review'),
           ),
@@ -1664,13 +1355,22 @@ class BusinessDetailsPage
       ),
     );
   }
+}
 
-  Widget actionButton(
-    BuildContext context,
-    IconData icon,
-    String title,
-    VoidCallback onPressed,
-  ) {
+class ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onPressed;
+
+  const ActionButton({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         IconButton.filled(
@@ -1681,11 +1381,20 @@ class BusinessDetailsPage
       ],
     );
   }
+}
 
-  Widget infoTile(
-    IconData icon,
-    String text,
-  ) {
+class InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const InfoTile({
+    super.key,
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(
         icon,
@@ -1696,9 +1405,9 @@ class BusinessDetailsPage
   }
 }
 
-// ============================================================
-// FAVORITES
-// ============================================================
+/* ============================================================
+   FAVORITES
+============================================================ */
 
 class FavoritesPage extends StatelessWidget {
   final List<Business> favorites;
@@ -1714,47 +1423,41 @@ class FavoritesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (favorites.isEmpty) {
       return const Center(
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 70,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 12),
-            Text(
-              'No favorite businesses yet.',
-              style: TextStyle(fontSize: 17),
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(25),
+          child: Text(
+            'No favorite businesses yet.\n\n'
+            'Tap ❤️ on a business to save it here.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 17),
+          ),
         ),
       );
     }
 
-    return ListView(
-      padding:
-          const EdgeInsets.all(16),
-      children: favorites
-          .map(
-            (business) => BusinessCard(
-              business: business,
-              isFavorite: true,
-              onFavorite: () =>
-                  onFavorite(business),
-            ),
-          )
-          .toList(),
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: favorites.length,
+      itemBuilder: (context, index) {
+        final business = favorites[index];
+
+        return BusinessCard(
+          business: business,
+          isFavorite: true,
+          onFavorite: () =>
+              onFavorite(business),
+        );
+      },
     );
   }
 }
 
-// ============================================================
-// ADD BUSINESS
-// ============================================================
+/* ============================================================
+   ADD BUSINESS
+============================================================ */
 
-class AddBusinessPage extends StatefulWidget {
+class AddBusinessPage
+    extends StatefulWidget {
   const AddBusinessPage({super.key});
 
   @override
@@ -1773,7 +1476,7 @@ class _AddBusinessPageState
   final phoneController =
       TextEditingController();
 
-  final locationController =
+  final addressController =
       TextEditingController();
 
   final hoursController =
@@ -1782,55 +1485,33 @@ class _AddBusinessPageState
   final descriptionController =
       TextEditingController();
 
-  bool submitting = false;
-
-  Future<void> submit() async {
-    if (nameController.text.trim().isEmpty ||
-        categoryController.text
-            .trim()
-            .isEmpty ||
-        phoneController.text
-            .trim()
-            .isEmpty ||
-        locationController.text
-            .trim()
-            .isEmpty) {
-      showMessage(
-        context,
-        'Please fill the required fields.',
-      );
-      return;
-    }
-
-    setState(() {
-      submitting = true;
-    });
-
-    await Future.delayed(
-      const Duration(milliseconds: 700),
-    );
-
-    if (!mounted) return;
-
-    setState(() {
-      submitting = false;
-    });
-
-    showMessage(
-      context,
-      'Business submitted successfully.',
-    );
-  }
-
   @override
   void dispose() {
     nameController.dispose();
     categoryController.dispose();
     phoneController.dispose();
-    locationController.dispose();
+    addressController.dispose();
     hoursController.dispose();
     descriptionController.dispose();
     super.dispose();
+  }
+
+  void submit() {
+    if (nameController.text.trim().isEmpty ||
+        categoryController.text.trim().isEmpty ||
+        phoneController.text.trim().isEmpty ||
+        addressController.text.trim().isEmpty) {
+      showMessage(
+        context,
+        'Please fill all required fields.',
+      );
+      return;
+    }
+
+    showMessage(
+      context,
+      'Business submitted successfully.',
+    );
   }
 
   @override
@@ -1841,8 +1522,7 @@ class _AddBusinessPageState
             const Text('Add Your Business'),
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         children: [
           const Text(
             'Business Information',
@@ -1854,43 +1534,42 @@ class _AddBusinessPageState
 
           const SizedBox(height: 20),
 
-          field(
-            controller: nameController,
-            label: 'Business Name',
-            icon: Icons.store,
+          _field(
+            nameController,
+            'Business Name',
+            Icons.store,
           ),
 
-          field(
-            controller: categoryController,
-            label: 'Category',
-            icon: Icons.category,
+          _field(
+            categoryController,
+            'Category',
+            Icons.category,
           ),
 
-          field(
-            controller: phoneController,
-            label: 'Phone Number',
-            icon: Icons.phone,
-            keyboardType:
+          _field(
+            phoneController,
+            'Phone Number',
+            Icons.phone,
+            keyboard:
                 TextInputType.phone,
           ),
 
-          field(
-            controller: locationController,
-            label: 'Location',
-            icon: Icons.location_on,
+          _field(
+            addressController,
+            'Location / Address',
+            Icons.location_on,
           ),
 
-          field(
-            controller: hoursController,
-            label: 'Opening Hours',
-            icon: Icons.access_time,
+          _field(
+            hoursController,
+            'Opening Hours',
+            Icons.access_time,
           ),
 
-          field(
-            controller:
-                descriptionController,
-            label: 'Description',
-            icon: Icons.description,
+          _field(
+            descriptionController,
+            'Description',
+            Icons.description,
             maxLines: 4,
           ),
 
@@ -1900,10 +1579,11 @@ class _AddBusinessPageState
             onPressed: () {
               showMessage(
                 context,
-                'Photo picker can be connected here.',
+                'Photo upload will be connected in the next stage.',
               );
             },
-            icon: const Icon(Icons.photo),
+            icon:
+                const Icon(Icons.photo),
             label:
                 const Text('Add Photos'),
           ),
@@ -1913,20 +1593,9 @@ class _AddBusinessPageState
           SizedBox(
             height: 52,
             child: ElevatedButton(
-              onPressed:
-                  submitting ? null : submit,
-              child: submitting
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child:
-                          CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Submit Business',
-                    ),
+              onPressed: submit,
+              child:
+                  const Text('Submit Business'),
             ),
           ),
         ],
@@ -1934,21 +1603,20 @@ class _AddBusinessPageState
     );
   }
 
-  Widget field({
-    required TextEditingController
-        controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
+  Widget _field(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
     int maxLines = 1,
+    TextInputType? keyboard,
   }) {
     return Padding(
       padding:
           const EdgeInsets.only(bottom: 14),
       child: TextField(
         controller: controller,
-        keyboardType: keyboardType,
         maxLines: maxLines,
+        keyboardType: keyboard,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
@@ -1962,12 +1630,48 @@ class _AddBusinessPageState
   }
 }
 
-// ============================================================
-// LOGIN
-// ============================================================
+/* ============================================================
+   LOGIN
+============================================================ */
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() =>
+      _LoginPageState();
+}
+
+class _LoginPageState
+    extends State<LoginPage> {
+  final emailController =
+      TextEditingController();
+
+  final passwordController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void login() {
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
+      showMessage(
+        context,
+        'Please enter email and password.',
+      );
+      return;
+    }
+
+    showMessage(
+      context,
+      'Login system is ready for backend connection.',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1977,21 +1681,21 @@ class LoginPage extends StatelessWidget {
             const Text('Login / Sign Up'),
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         children: [
           const Icon(
             Icons.account_circle,
             size: 100,
-            color: Colors.blue,
           ),
 
           const SizedBox(height: 20),
 
-          const TextField(
+          TextField(
+            controller: emailController,
             keyboardType:
                 TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration:
+                const InputDecoration(
               labelText: 'Email',
               prefixIcon:
                   Icon(Icons.email),
@@ -2002,9 +1706,12 @@ class LoginPage extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          const TextField(
+          TextField(
+            controller:
+                passwordController,
             obscureText: true,
-            decoration: InputDecoration(
+            decoration:
+                const InputDecoration(
               labelText: 'Password',
               prefixIcon:
                   Icon(Icons.lock),
@@ -2018,12 +1725,7 @@ class LoginPage extends StatelessWidget {
           SizedBox(
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                showMessage(
-                  context,
-                  'Login system ready.',
-                );
-              },
+              onPressed: login,
               child:
                   const Text('Login'),
             ),
@@ -2049,12 +1751,54 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-// ============================================================
-// SIGN UP
-// ============================================================
+/* ============================================================
+   SIGN UP
+============================================================ */
 
-class SignupPage extends StatelessWidget {
+class SignupPage
+    extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() =>
+      _SignupPageState();
+}
+
+class _SignupPageState
+    extends State<SignupPage> {
+  final nameController =
+      TextEditingController();
+
+  final emailController =
+      TextEditingController();
+
+  final passwordController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void signup() {
+    if (nameController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
+      showMessage(
+        context,
+        'Please complete all fields.',
+      );
+      return;
+    }
+
+    showMessage(
+      context,
+      'Account form is ready for backend connection.',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2064,11 +1808,12 @@ class SignupPage extends StatelessWidget {
             const Text('Create Account'),
       ),
       body: ListView(
-        padding:
-            const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         children: [
-          const TextField(
-            decoration: InputDecoration(
+          TextField(
+            controller: nameController,
+            decoration:
+                const InputDecoration(
               labelText: 'Full Name',
               prefixIcon:
                   Icon(Icons.person),
@@ -2079,10 +1824,12 @@ class SignupPage extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          const TextField(
+          TextField(
+            controller: emailController,
             keyboardType:
                 TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration:
+                const InputDecoration(
               labelText: 'Email',
               prefixIcon:
                   Icon(Icons.email),
@@ -2093,9 +1840,12 @@ class SignupPage extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          const TextField(
+          TextField(
+            controller:
+                passwordController,
             obscureText: true,
-            decoration: InputDecoration(
+            decoration:
+                const InputDecoration(
               labelText: 'Password',
               prefixIcon:
                   Icon(Icons.lock),
@@ -2109,12 +1859,7 @@ class SignupPage extends StatelessWidget {
           SizedBox(
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                showMessage(
-                  context,
-                  'Account creation ready.',
-                );
-              },
+              onPressed: signup,
               child:
                   const Text('Sign Up'),
             ),
@@ -2125,13 +1870,15 @@ class SignupPage extends StatelessWidget {
   }
 }
 
-// ============================================================
-// NOTIFICATIONS
-// ============================================================
+/* ============================================================
+   NOTIFICATIONS
+============================================================ */
 
 class NotificationsPage
     extends StatelessWidget {
-  const NotificationsPage({super.key});
+  const NotificationsPage({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2147,10 +1894,10 @@ class NotificationsPage
           children: [
             Icon(
               Icons.notifications_none,
-              size: 70,
+              size: 80,
               color: Colors.grey,
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 15),
             Text(
               'No new notifications',
               style:
@@ -2163,58 +1910,19 @@ class NotificationsPage
   }
 }
 
-// ============================================================
-// INFO CARD
-// ============================================================
-
-class InfoCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String text;
-
-  const InfoCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin:
-          const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          child: Icon(icon),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(text),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// MESSAGE
-// ============================================================
+/* ============================================================
+   HELPERS
+============================================================ */
 
 void showMessage(
   BuildContext context,
   String message,
 ) {
   ScaffoldMessenger.of(context)
-      .hideCurrentSnackBar();
-
-  ScaffoldMessenger.of(context)
-      .showSnackBar(
-    SnackBar(
-      content: Text(message),
-    ),
-  );
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
 }
