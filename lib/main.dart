@@ -559,14 +559,6 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 }
-          const SizedBox(height: 20),
-          ...businesses.map((b) => BusinessCard(business: b)),
-        ],
-      ),
-    );
-  }
-}
-
 class NearbyTab extends StatelessWidget {
   final List<Business> favorites;
   final Function(Business) onFavorite;
