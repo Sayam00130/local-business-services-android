@@ -18,20 +18,23 @@ jobs:
 
       - name: Create Firebase config
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+              - name: Get Flutter packages
         run: |
-          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-
+          cd "$GITHUB_WORKSPACE"
+          pwd
+          ls -la
+          flutter pub get
       - name: Get Flutter packages
         run: |
           flutter pub get
 
-      - name: Build Release APK
+         - name: Build Release APK
         env:
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
         run: |
+          cd "$GITHUB_WORKSPACE"
           flutter build apk --release \
-            --dart-define=GOOGLE_PLACES_API_KEY="$GOOGLE_PLACES_API_KEY"
+            --dart-define=GOOGLE_PLACES_API_KEY="$GOOGLE_PLACES_API_KEY"   
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
