@@ -2,11 +2,14 @@
         run: |
           flutter create \
             --org com.localbusinessservices \
+            --project-name local_business_services \
             app
 
       - name: Add Internet permission
         run: |
           sed -i '/<manifest/a\    <uses-permission android:name="android.permission.INTERNET"/>' app/android/app/src/main/AndroidManifest.xml
+
+      - name: Copy main.dart
 
       - name: Copy app code
         run: |
