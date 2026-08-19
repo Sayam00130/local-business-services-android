@@ -13,6 +13,10 @@ Future<void> main() async {
   runApp(const LocalBusinessServicesApp());
 }
 
+/* ============================================================
+   APP
+============================================================ */
+
 class LocalBusinessServicesApp extends StatelessWidget {
   const LocalBusinessServicesApp({super.key});
 
@@ -31,6 +35,10 @@ class LocalBusinessServicesApp extends StatelessWidget {
   }
 }
 
+/* ============================================================
+   MODELS
+============================================================ */
+
 class Business {
   final String id;
   final String name;
@@ -43,6 +51,9 @@ class Business {
   final double rating;
   final int reviewCount;
   final bool openNow;
+  final String ownerId;
+  final String status;
+  final bool premium;
 
   const Business({
     this.id = '',
@@ -56,8 +67,123 @@ class Business {
     this.rating = 0,
     this.reviewCount = 0,
     this.openNow = false,
+    this.ownerId = '',
+    this.status = 'approved',
+    this.premium = false,
   });
+
+  factory Business.fromMap(
+    String id,
+    Map<String, dynamic> data,
+  ) {
+    return Business(
+      id: id,
+      name: data['name']?.toString() ?? 'Business',
+      category: data['category']?.toString() ?? 'Business',
+      address: data['address']?.toString() ?? '',
+      phone: data['phone']?.toString() ?? '',
+      mapsUrl: data['mapsUrl']?.toString() ?? '',
+      website: data['website']?.toString() ?? '',
+      description: data['description']?.toString() ?? '',
+      rating: data['rating'] is num
+          ? (data['rating'] as num).toDouble()
+          : 0,
+      reviewCount: data['reviewCount'] is num
+          ? (data['reviewCount'] as num).toInt()
+          : 0,
+      openNow: data['openNow'] == true,
+      ownerId: data['ownerId']?.toString() ?? '',
+      status: data['status']?.toString() ?? 'pending',
+      premium: data['premium'] == true,
+    );
+  }
 }
+
+/* ============================================================
+   APP CONFIG
+============================================================ */
+
+class AppConfig {
+  // Change this email to YOUR Firebase admin email.
+  // Firestore rules must use the same admin email/UID strategy.
+  static const String adminEmail = 'admin@example.com';
+
+  static const int monthlyPremiumPrice = 2000;
+
+  static const String premiumName = 'Monthly Premium';
+
+  static const String adLabel = 'Advertisement';
+}
+
+/* ============================================================
+   FIREBASE SERVICE
+============================================================ */
+
+class FirebaseService {
+  static final FirebaseFirestore db =
+      FirebaseFirestore.instance;
+
+  static final FirebaseAuth auth =
+      FirebaseAuth.instance;
+
+  static User? get user => auth.currentUser;
+
+  static bool get loggedIn => user != null;
+
+  static bool get isAdmin {
+    final email = user?.email?.toLowerCase().trim();
+
+    return email != null &&
+        email.isNotEmpty &&
+        email == AppConfig.adminEmail.toLowerCase();
+  }
+
+  static Future<bool> isPremium() async {
+    final current = user;
+
+    if (current == null) return false;
+
+    final doc = await db
+        .collection('users')
+        .doc(current.uid)
+        .get();
+
+    if (!doc.exists) return false;
+
+    final data = doc.data();
+
+    if (data == null) return false;
+
+    final premium = data['premium'] == true;
+
+    if (!premium) return false;
+
+    final expiry = data['premiumExpiry'];
+
+    if (expiry is Timestamp) {
+      return expiry.toDate().isAfter(DateTime.now());
+    }
+
+    return false;
+  }
+
+  static Future<Map<String, dynamic>?> userData() async {
+    final current = user;
+
+    if (current == null) return null;
+
+    final doc = await db
+        .collection('users')
+        .doc(current.uid)
+        .get();
+
+    return doc.data();
+  }
+}
+
+/* ============================================================
+   SPLASH
+============================================================ */
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -71,16 +197,19 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
+    Future.delayed(
+      const Duration(seconds: 2),
+      () {
+        if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const HomePage(),
-        ),
-      );
-    });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HomePage(),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -89,7 +218,10 @@ class _SplashPageState extends State<SplashPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.indigo],
+            colors: [
+              Colors.blue,
+              Colors.indigo,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -99,11 +231,11 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: 50,
+                radius: 52,
                 backgroundColor: Colors.white,
                 child: Icon(
                   Icons.business,
-                  size: 58,
+                  size: 60,
                   color: Colors.blue,
                 ),
               ),
@@ -120,6 +252,7 @@ class _SplashPageState extends State<SplashPage> {
               SizedBox(height: 12),
               Text(
                 'Find businesses and services anywhere',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white70,
                 ),
@@ -136,6 +269,10 @@ class _SplashPageState extends State<SplashPage> {
   }
 }
 
+/* ============================================================
+   HOME
+============================================================ */
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -145,6 +282,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
+
   final List<Business> favorites = [];
 
   bool isFavorite(Business business) {
@@ -228,26 +366,25 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: pages[selectedIndex],
-      floatingActionButton:
-          selectedIndex == 0
-              ? FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const AddBusinessPage(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.add_business,
+      floatingActionButton: selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const AddBusinessPage(),
                   ),
-                  label: const Text(
-                    'List Your Business',
-                  ),
-                )
-              : null,
+                );
+              },
+              icon: const Icon(
+                Icons.add_business,
+              ),
+              label: const Text(
+                'List Your Business',
+              ),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: (value) {
@@ -266,21 +403,13 @@ class _HomePageState extends State<HomePage> {
             label: 'Search',
           ),
           NavigationDestination(
-            icon: Icon(
-              Icons.location_on_outlined,
-            ),
-            selectedIcon: Icon(
-              Icons.location_on,
-            ),
+            icon: Icon(Icons.location_on_outlined),
+            selectedIcon: Icon(Icons.location_on),
             label: 'Nearby',
           ),
           NavigationDestination(
-            icon: Icon(
-              Icons.favorite_border,
-            ),
-            selectedIcon: Icon(
-              Icons.favorite,
-            ),
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
         ],
@@ -288,6 +417,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+/* ============================================================
+   HOME TAB
+============================================================ */
 
 class HomeTab extends StatelessWidget {
   final bool Function(Business) isFavorite;
@@ -304,10 +437,7 @@ class HomeTab extends StatelessWidget {
     final categories = [
       [Icons.restaurant, 'Restaurants'],
       [Icons.local_hospital, 'Healthcare'],
-      [
-        Icons.electrical_services,
-        'Electricians',
-      ],
+      [Icons.electrical_services, 'Electricians'],
       [Icons.plumbing, 'Plumbers'],
       [Icons.car_repair, 'Mechanics'],
       [Icons.store, 'Shops'],
@@ -335,8 +465,7 @@ class HomeTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(26),
           ),
           child: const Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Find What You Need',
@@ -397,7 +526,9 @@ class HomeTab extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 25),
+        const AdPlaceholder(),
+        const SizedBox(height: 25),
         const Text(
           'Explore Categories',
           style: TextStyle(
@@ -409,8 +540,7 @@ class HomeTab extends StatelessWidget {
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
-          physics:
-              const NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
           childAspectRatio: .82,
@@ -421,10 +551,10 @@ class HomeTab extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        CategorySearchPage(
-                      title:
-                          category[1] as String,
+                    builder: (_) => CategorySearchPage(
+                      title: category[1] as String,
+                      isFavorite: isFavorite,
+                      onFavorite: onFavorite,
                     ),
                   ),
                 );
@@ -466,7 +596,7 @@ class HomeTab extends StatelessWidget {
               ),
             ),
             subtitle: const Text(
-              'Premium plans from Rs. 2,000/month',
+              'Rs. 2,000/month',
             ),
             trailing: const Icon(
               Icons.arrow_forward_ios,
@@ -487,6 +617,72 @@ class HomeTab extends StatelessWidget {
     );
   }
 }
+
+/* ============================================================
+   ADS STRUCTURE
+============================================================ */
+
+class AdPlaceholder extends StatelessWidget {
+  const AdPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseService.user;
+
+    if (user == null) {
+      return _adBox();
+    }
+
+    return FutureBuilder<bool>(
+      future: FirebaseService.isPremium(),
+      builder: (context, snapshot) {
+        if (snapshot.data == true) {
+          return const SizedBox.shrink();
+        }
+
+        return _adBox();
+      },
+    );
+  }
+
+  Widget _adBox() {
+    return Container(
+      height: 70,
+      width: double.infinity,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.black12,
+        ),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            AppConfig.adLabel,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Ad space',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   GOOGLE PLACES
+============================================================ */
 
 class PlacesService {
   static const apiKey = String.fromEnvironment(
@@ -525,6 +721,7 @@ class PlacesService {
     }
 
     final data = jsonDecode(response.body);
+
     final places = data['places'];
 
     if (places is! List) {
@@ -532,64 +729,53 @@ class PlacesService {
     }
 
     return places.map<Business>((place) {
-      final display =
-          place['displayName'];
+      final display = place['displayName'];
 
       final name = display is Map
-          ? (display['text'] ??
-                  'Unknown Business')
+          ? (display['text'] ?? 'Unknown Business')
               .toString()
           : 'Unknown Business';
 
-      final rating =
-          place['rating'] is num
-              ? (place['rating'] as num)
-                  .toDouble()
-              : 0.0;
+      final rating = place['rating'] is num
+          ? (place['rating'] as num).toDouble()
+          : 0.0;
 
       final reviews =
           place['userRatingCount'] is num
-              ? (place['userRatingCount']
-                      as num)
-                  .toInt()
+              ? (place['userRatingCount'] as num).toInt()
               : 0;
 
-      final opening =
-          place['currentOpeningHours'];
+      final opening = place['currentOpeningHours'];
 
       return Business(
         id: place['id']?.toString() ?? name,
         name: name,
-        category:
-            (place['primaryType'] ??
-                    'Business')
-                .toString()
-                .replaceAll('_', ' '),
+        category: (place['primaryType'] ?? 'Business')
+            .toString()
+            .replaceAll('_', ' '),
         address:
-            place['formattedAddress']
-                    ?.toString() ??
+            place['formattedAddress']?.toString() ??
                 'Address unavailable',
         phone:
-            place['internationalPhoneNumber']
-                    ?.toString() ??
-                place['nationalPhoneNumber']
-                    ?.toString() ??
+            place['internationalPhoneNumber']?.toString() ??
+                place['nationalPhoneNumber']?.toString() ??
                 '',
         mapsUrl:
-            place['googleMapsUri']
-                    ?.toString() ??
-                '',
+            place['googleMapsUri']?.toString() ?? '',
         website:
-            place['websiteUri']?.toString() ??
-                '',
+            place['websiteUri']?.toString() ?? '',
         rating: rating,
         reviewCount: reviews,
-        openNow: opening is Map &&
-            opening['openNow'] == true,
+        openNow:
+            opening is Map && opening['openNow'] == true,
       );
     }).toList();
   }
 }
+
+/* ============================================================
+   SEARCH
+============================================================ */
 
 class SearchPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -601,33 +787,28 @@ class SearchPage extends StatefulWidget {
     this.onFavorite = _emptyFavorite,
   });
 
-  static bool _falseFavorite(
-    Business business,
-  ) =>
-      false;
+  static bool _falseFavorite(Business business) => false;
 
-  static void _emptyFavorite(
-    Business business,
-  ) {}
+  static void _emptyFavorite(Business business) {}
 
   @override
   State<SearchPage> createState() =>
       _SearchPageState();
 }
 
-class _SearchPageState
-    extends State<SearchPage> {
+class _SearchPageState extends State<SearchPage> {
   final controller = TextEditingController();
+
   List<Business> results = [];
+
   bool loading = false;
+
   String error = '';
 
   Future<void> search() async {
     final query = controller.text.trim();
 
-    if (query.isEmpty) {
-      return;
-    }
+    if (query.isEmpty) return;
 
     setState(() {
       loading = true;
@@ -654,9 +835,7 @@ class _SearchPageState
 
       setState(() {
         loading = false;
-        error = e
-            .toString()
-            .replaceFirst(
+        error = e.toString().replaceFirst(
               'Exception: ',
               '',
             );
@@ -694,14 +873,14 @@ class _SearchPageState
                     const Icon(Icons.search),
                 suffixIcon: IconButton(
                   onPressed: search,
-                  icon:
-                      const Icon(Icons.search),
+                  icon: const Icon(Icons.search),
                 ),
                 border:
                     const OutlineInputBorder(),
               ),
             ),
           ),
+          const AdPlaceholder(),
           Expanded(
             child: loading
                 ? const Center(
@@ -712,8 +891,7 @@ class _SearchPageState
                     ? Center(
                         child: Padding(
                           padding:
-                              const EdgeInsets.all(
-                                  20),
+                              const EdgeInsets.all(20),
                           child: Text(
                             error,
                             textAlign:
@@ -729,25 +907,23 @@ class _SearchPageState
                           )
                         : ListView.builder(
                             padding:
-                                const EdgeInsets
-                                    .all(16),
+                                const EdgeInsets.all(16),
                             itemCount:
                                 results.length,
-                            itemBuilder:
-                                (_, index) {
+                            itemBuilder: (_, index) {
                               final business =
                                   results[index];
 
                               return BusinessCard(
-                                business:
-                                    business,
-                                favorite: widget
-                                    .isFavorite(
+                                business: business,
+                                favorite:
+                                    widget.isFavorite(
                                   business,
                                 ),
                                 onFavorite: () {
                                   widget.onFavorite(
-                                      business);
+                                    business,
+                                  );
                                   setState(() {});
                                 },
                               );
@@ -760,13 +936,21 @@ class _SearchPageState
   }
 }
 
+/* ============================================================
+   CATEGORY
+============================================================ */
+
 class CategorySearchPage
     extends StatefulWidget {
   final String title;
+  final bool Function(Business) isFavorite;
+  final void Function(Business) onFavorite;
 
   const CategorySearchPage({
     super.key,
     required this.title,
+    required this.isFavorite,
+    required this.onFavorite,
   });
 
   @override
@@ -777,7 +961,9 @@ class CategorySearchPage
 class _CategorySearchPageState
     extends State<CategorySearchPage> {
   bool loading = true;
+
   String error = '';
+
   List<Business> businesses = [];
 
   @override
@@ -788,8 +974,7 @@ class _CategorySearchPageState
 
   Future<void> load() async {
     try {
-      final data =
-          await PlacesService.search(
+      final data = await PlacesService.search(
         '${widget.title} near me',
       );
 
@@ -804,9 +989,7 @@ class _CategorySearchPageState
 
       setState(() {
         loading = false;
-        error = e
-            .toString()
-            .replaceFirst(
+        error = e.toString().replaceFirst(
               'Exception: ',
               '',
             );
@@ -835,18 +1018,33 @@ class _CategorySearchPageState
                   : ListView.builder(
                       padding:
                           const EdgeInsets.all(16),
-                      itemCount:
-                          businesses.length,
+                      itemCount: businesses.length,
                       itemBuilder: (_, index) {
+                        final business =
+                            businesses[index];
+
                         return BusinessCard(
-                          business:
-                              businesses[index],
+                          business: business,
+                          favorite:
+                              widget.isFavorite(
+                            business,
+                          ),
+                          onFavorite: () {
+                            widget.onFavorite(
+                              business,
+                            );
+                            setState(() {});
+                          },
                         );
                       },
                     ),
     );
   }
 }
+
+/* ============================================================
+   NEARBY
+============================================================ */
 
 class NearbyPage extends StatefulWidget {
   final bool Function(Business) isFavorite;
@@ -870,7 +1068,9 @@ class _NearbyPageState
   final controller = TextEditingController();
 
   List<Business> businesses = [];
+
   bool loading = false;
+
   String error = '';
 
   Future<void> search() async {
@@ -907,9 +1107,7 @@ class _NearbyPageState
 
       setState(() {
         loading = false;
-        error = e
-            .toString()
-            .replaceFirst(
+        error = e.toString().replaceFirst(
               'Exception: ',
               '',
             );
@@ -955,6 +1153,7 @@ class _NearbyPageState
               ),
             ),
           ),
+          const AdPlaceholder(),
           Expanded(
             child: loading
                 ? const Center(
@@ -975,8 +1174,7 @@ class _NearbyPageState
                           )
                         : ListView.builder(
                             padding:
-                                const EdgeInsets
-                                    .all(16),
+                                const EdgeInsets.all(16),
                             itemCount:
                                 businesses.length,
                             itemBuilder:
@@ -993,7 +1191,8 @@ class _NearbyPageState
                                 ),
                                 onFavorite: () {
                                   widget.onFavorite(
-                                      business);
+                                    business,
+                                  );
                                   setState(() {});
                                 },
                               );
@@ -1006,7 +1205,12 @@ class _NearbyPageState
   }
 }
 
-class BusinessCard extends StatelessWidget {
+/* ============================================================
+   BUSINESS CARD
+============================================================ */
+
+class BusinessCard
+    extends StatelessWidget {
   final Business business;
   final bool favorite;
   final VoidCallback? onFavorite;
@@ -1055,17 +1259,34 @@ class BusinessCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      business.name,
-                      maxLines: 2,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style:
-                          const TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            business.name,
+                            maxLines: 2,
+                            overflow:
+                                TextOverflow.ellipsis,
+                            style:
+                                const TextStyle(
+                              fontWeight:
+                                  FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        if (business.premium)
+                          const Padding(
+                            padding:
+                                EdgeInsets.only(
+                                    left: 5),
+                            child: Icon(
+                              Icons.verified,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -1103,9 +1324,15 @@ class BusinessCard extends StatelessWidget {
                   Text(
                     business.rating > 0
                         ? business.rating
-                            .toStringAsFixed(
-                                1)
+                            .toStringAsFixed(1)
                         : 'No rating',
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '(${business.reviewCount})',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                    ),
                   ),
                   const Spacer(),
                   if (business.openNow)
@@ -1134,6 +1361,10 @@ class BusinessCard extends StatelessWidget {
     );
   }
 }
+
+/* ============================================================
+   BUSINESS DETAILS
+============================================================ */
 
 class BusinessDetailsPage
     extends StatelessWidget {
@@ -1165,11 +1396,7 @@ class BusinessDetailsPage
     if (uri == null) return;
 
     try {
-      await launchUrl(
-        uri,
-        mode:
-            LaunchMode.externalApplication,
-      );
+      await launchUrl(uri);
     } catch (_) {
       if (!context.mounted) return;
 
@@ -1229,13 +1456,25 @@ class BusinessDetailsPage
             ),
           ),
           const SizedBox(height: 18),
-          Text(
-            business.name,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight:
-                  FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  business.name,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (business.premium)
+                const Icon(
+                  Icons.verified,
+                  color: Colors.blue,
+                  size: 30,
+                ),
+            ],
           ),
           const SizedBox(height: 7),
           Text(
@@ -1269,8 +1508,7 @@ class BusinessDetailsPage
                     final phone =
                         business.phone
                             .replaceAll(
-                      RegExp(
-                          r'[^\d+]'),
+                      RegExp(r'[^\d+]'),
                       '',
                     );
 
@@ -1383,6 +1621,10 @@ class BusinessDetailsPage
     );
   }
 }
+
+/* ============================================================
+   REVIEWS
+============================================================ */
 
 class ReviewsPage extends StatelessWidget {
   final Business business;
@@ -1579,8 +1821,10 @@ class WriteReviewPage
 class _WriteReviewPageState
     extends State<WriteReviewPage> {
   double rating = 5;
+
   final controller =
       TextEditingController();
+
   bool saving = false;
 
   Future<void> submit() async {
@@ -1626,7 +1870,6 @@ class _WriteReviewPageState
                 ?.split('@')
                 .first ??
             'Customer',
-        'email': user.email ?? '',
         'rating': rating,
         'comment':
             controller.text.trim(),
@@ -1754,9 +1997,14 @@ class _WriteReviewPageState
   }
 }
 
+/* ============================================================
+   FAVORITES
+============================================================ */
+
 class FavoritesPage
     extends StatelessWidget {
   final List<Business> favorites;
+
   final void Function(Business)
       onFavorite;
 
@@ -1807,13 +2055,18 @@ class FavoritesPage
           favorite: true,
           onFavorite: () {
             onFavorite(
-                favorites[index]);
+              favorites[index],
+            );
           },
         );
       },
     );
   }
 }
+
+/* ============================================================
+   LOGIN
+============================================================ */
 
 class LoginPage
     extends StatefulWidget {
@@ -1828,10 +2081,12 @@ class _LoginPageState
     extends State<LoginPage> {
   final email =
       TextEditingController();
+
   final password =
       TextEditingController();
 
   bool obscure = true;
+
   bool loading = false;
 
   Future<void> login() async {
@@ -1958,8 +2213,7 @@ class _LoginPageState
                 icon: Icon(
                   obscure
                       ? Icons.visibility
-                      : Icons
-                          .visibility_off,
+                      : Icons.visibility_off,
                 ),
               ),
               border:
@@ -2000,6 +2254,10 @@ class _LoginPageState
   }
 }
 
+/* ============================================================
+   SIGNUP
+============================================================ */
+
 class SignupPage
     extends StatefulWidget {
   const SignupPage({super.key});
@@ -2013,10 +2271,13 @@ class _SignupPageState
     extends State<SignupPage> {
   final name =
       TextEditingController();
+
   final email =
       TextEditingController();
+
   final password =
       TextEditingController();
+
   final confirm =
       TextEditingController();
 
@@ -2092,6 +2353,8 @@ class _SignupPageState
           'uid': user.uid,
           'name': name.text.trim(),
           'email': email.text.trim(),
+          'premium': false,
+          'premiumExpiry': null,
           'createdAt':
               FieldValue.serverTimestamp(),
         });
@@ -2227,6 +2490,10 @@ class _SignupPageState
   }
 }
 
+/* ============================================================
+   PROFILE
+============================================================ */
+
 class ProfilePage
     extends StatelessWidget {
   const ProfilePage({super.key});
@@ -2338,6 +2605,8 @@ class ProfilePage
                   Text(
                     user.email ?? '',
                   ),
+                  const SizedBox(height: 12),
+                  const PremiumStatusCard(),
                 ],
               ),
             ),
@@ -2367,6 +2636,13 @@ class ProfilePage
             'Premium',
             const PremiumPage(),
           ),
+          if (FirebaseService.isAdmin)
+            _profileButton(
+              context,
+              Icons.admin_panel_settings,
+              'Admin Panel',
+              const AdminPage(),
+            ),
           _profileButton(
             context,
             Icons.settings,
@@ -2446,6 +2722,126 @@ class ProfilePage
   }
 }
 
+/* ============================================================
+   PREMIUM STATUS
+============================================================ */
+
+class PremiumStatusCard
+    extends StatelessWidget {
+  const PremiumStatusCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user =
+        FirebaseService.user;
+
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: FirebaseService.userData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const LinearProgressIndicator();
+        }
+
+        final data = snapshot.data;
+
+        final premium =
+            data?['premium'] == true;
+
+        DateTime? expiry;
+
+        final value =
+            data?['premiumExpiry'];
+
+        if (value is Timestamp) {
+          expiry = value.toDate();
+        }
+
+        final active = premium &&
+            expiry != null &&
+            expiry.isAfter(DateTime.now());
+
+        if (active) {
+          return Container(
+            padding:
+                const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              borderRadius:
+                  BorderRadius.circular(14),
+              border: Border.all(
+                color: Colors.amber,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.workspace_premium,
+                  color: Colors.orange,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Premium Active\nExpires: ${_date(expiry)}',
+                    style:
+                        const TextStyle(
+                      fontWeight:
+                          FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Container(
+          padding:
+              const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius:
+                BorderRadius.circular(14),
+          ),
+          child: const Row(
+            children: [
+              Icon(
+                Icons.workspace_premium,
+                color: Colors.blue,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Premium is not active',
+                  style:
+                      TextStyle(
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static String _date(DateTime? date) {
+    if (date == null) return '-';
+
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+/* ============================================================
+   EDIT PROFILE
+============================================================ */
+
 class EditProfilePage
     extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -2458,6 +2854,7 @@ class EditProfilePage
 class _EditProfilePageState
     extends State<EditProfilePage> {
   late TextEditingController name;
+
   late TextEditingController email;
 
   @override
@@ -2509,8 +2906,6 @@ class _EditProfilePageState
           ),
         ),
       );
-
-      setState(() {});
     } catch (e) {
       if (!mounted) return;
 
@@ -2580,6 +2975,10 @@ class _EditProfilePageState
   }
 }
 
+/* ============================================================
+   ADD BUSINESS
+============================================================ */
+
 class AddBusinessPage
     extends StatefulWidget {
   const AddBusinessPage({super.key});
@@ -2593,14 +2992,19 @@ class _AddBusinessPageState
     extends State<AddBusinessPage> {
   final name =
       TextEditingController();
+
   final category =
       TextEditingController();
+
   final address =
       TextEditingController();
+
   final phone =
       TextEditingController();
+
   final website =
       TextEditingController();
+
   final description =
       TextEditingController();
 
@@ -2658,6 +3062,9 @@ class _AddBusinessPageState
         'description':
             description.text.trim(),
         'status': 'pending',
+        'premium': false,
+        'rating': 0,
+        'reviewCount': 0,
         'createdAt':
             FieldValue.serverTimestamp(),
       });
@@ -2670,7 +3077,7 @@ class _AddBusinessPageState
           .showSnackBar(
         const SnackBar(
           content: Text(
-            'Business submitted successfully.',
+            'Business submitted successfully. It is pending admin approval.',
           ),
         ),
       );
@@ -2752,7 +3159,7 @@ class _AddBusinessPageState
           ),
           const SizedBox(height: 8),
           const Text(
-            'Submit your business for listing.',
+            'Your listing will be reviewed by the admin before appearing in the app.',
           ),
           const SizedBox(height: 22),
           field(
@@ -2807,6 +3214,10 @@ class _AddBusinessPageState
     );
   }
 }
+
+/* ============================================================
+   MY BUSINESS
+============================================================ */
 
 class MyBusinessPage
     extends StatelessWidget {
@@ -2924,6 +3335,9 @@ class MyBusinessPage
                             ?.toString() ??
                         'pending';
 
+                final premium =
+                    data['premium'] == true;
+
                 return Card(
                   margin:
                       const EdgeInsets.only(
@@ -2935,15 +3349,26 @@ class MyBusinessPage
                         Icons.business,
                       ),
                     ),
-                    title: Text(
-                      data['name']
-                              ?.toString() ??
-                          'Business',
-                      style:
-                          const TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data['name']
+                                    ?.toString() ??
+                                'Business',
+                            style:
+                                const TextStyle(
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (premium)
+                          const Icon(
+                            Icons.verified,
+                            color: Colors.blue,
+                          ),
+                      ],
                     ),
                     subtitle: Padding(
                       padding:
@@ -2954,9 +3379,8 @@ class MyBusinessPage
                       ),
                     ),
                     isThreeLine: true,
-                    trailing: _statusChip(
-                      status,
-                    ),
+                    trailing:
+                        _statusChip(status),
                   ),
                 );
               }),
@@ -2968,15 +3392,37 @@ class MyBusinessPage
   }
 
   Widget _statusChip(String status) {
+    Color color;
+
+    switch (status.toLowerCase()) {
+      case 'approved':
+        color = Colors.green;
+        break;
+      case 'rejected':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.orange;
+    }
+
     return Chip(
       label: Text(
         status.toUpperCase(),
         style:
-            const TextStyle(fontSize: 10),
+            TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight:
+              FontWeight.bold,
+        ),
       ),
     );
   }
 }
+
+/* ============================================================
+   MY REVIEWS
+============================================================ */
 
 class MyReviewsPage
     extends StatelessWidget {
@@ -3084,12 +3530,197 @@ class MyReviewsPage
   }
 }
 
+/* ============================================================
+   PREMIUM
+============================================================ */
+
 class PremiumPage
-    extends StatelessWidget {
+    extends StatefulWidget {
   const PremiumPage({super.key});
 
   @override
+  State<PremiumPage> createState() =>
+      _PremiumPageState();
+}
+
+class _PremiumPageState
+    extends State<PremiumPage> {
+  bool loading = true;
+
+  bool premium = false;
+
+  DateTime? expiry;
+
+  bool requestPending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  Future<void> load() async {
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        loading = false;
+      });
+      return;
+    }
+
+    try {
+      final data =
+          await FirebaseService.userData();
+
+      final value =
+          data?['premiumExpiry'];
+
+      DateTime? date;
+
+      if (value is Timestamp) {
+        date = value.toDate();
+      }
+
+      final active =
+          data?['premium'] == true &&
+              date != null &&
+              date.isAfter(DateTime.now());
+
+      final request =
+          await FirebaseFirestore
+              .instance
+              .collection('premiumRequests')
+              .where(
+                'userId',
+                isEqualTo: user.uid,
+              )
+              .where(
+                'status',
+                isEqualTo: 'pending',
+              )
+              .limit(1)
+              .get();
+
+      if (!mounted) return;
+
+      setState(() {
+        premium = active;
+        expiry = date;
+        requestPending =
+            request.docs.isNotEmpty;
+        loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  Future<void> requestPremium() async {
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const LoginPage(),
+        ),
+      );
+      return;
+    }
+
+    if (premium) {
+      return;
+    }
+
+    if (requestPending) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Your premium request is already pending.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final method =
+        await showDialog<String>(
+      context: context,
+      builder: (_) =>
+          const PaymentMethodDialog(),
+    );
+
+    if (method == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('premiumRequests')
+          .add({
+        'userId': user.uid,
+        'email': user.email ?? '',
+        'name':
+            user.displayName ?? '',
+        'plan': 'monthly',
+        'amount':
+            AppConfig.monthlyPremiumPrice,
+        'currency': 'PKR',
+        'paymentMethod': method,
+        'status': 'pending',
+        'createdAt':
+            FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+
+      setState(() {
+        requestPending = true;
+      });
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Premium request submitted. Admin will verify payment and activate your membership.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content:
+              Text('Request failed: $e'),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return Scaffold(
+        appBar: AppBar(
+          title:
+              const Text('Premium Plans'),
+        ),
+        body: const Center(
+          child:
+              CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title:
@@ -3132,7 +3763,7 @@ class PremiumPage
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Get more visibility and premium features.',
+                  'More visibility and premium account features.',
                   textAlign:
                       TextAlign.center,
                   style: TextStyle(
@@ -3143,64 +3774,118 @@ class PremiumPage
             ),
           ),
           const SizedBox(height: 20),
-          _planCard(
-            context,
-            title: 'Monthly Premium',
-            price: 'Rs. 2,000',
-            period: '/month',
-            icon: Icons.calendar_month,
-          ),
-          _planCard(
-            context,
-            title: 'Yearly Premium',
-            price: 'Rs. 12,000',
-            period: '/year',
-            icon: Icons.calendar_today,
-          ),
-          const SizedBox(height: 10),
-          const Card(
+          Card(
             child: Padding(
               padding:
-                  EdgeInsets.all(18),
+                  const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Premium Features',
+                  const Text(
+                    'Monthly Premium',
                     style: TextStyle(
-                      fontSize: 19,
+                      fontSize: 21,
                       fontWeight:
                           FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 12),
-                  Text(
-                    '✓ Premium business visibility',
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Rs. 2,000 / month',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
                   ),
-                  Text(
-                    '✓ Premium profile badge',
+                  const SizedBox(height: 18),
+                  const Text(
+                    '✓ Premium badge\n'
+                    '✓ Enhanced business presence\n'
+                    '✓ Priority placement options\n'
+                    '✓ Premium account features\n'
+                    '✓ No in-app ad placeholders while premium is active',
+                    style:
+                        TextStyle(height: 1.8),
                   ),
-                  Text(
-                    '✓ Enhanced business presence',
-                  ),
-                  Text(
-                    '✓ Priority placement options',
-                  ),
-                  Text(
-                    '✓ Premium account features',
-                  ),
+                  const SizedBox(height: 20),
+                  if (premium)
+                    Container(
+                      padding:
+                          const EdgeInsets.all(14),
+                      decoration:
+                          BoxDecoration(
+                        color:
+                            Colors.green.shade50,
+                        borderRadius:
+                            BorderRadius.circular(
+                                12),
+                      ),
+                      child: Text(
+                        'Premium Active\nExpiry: ${_date(expiry)}',
+                        style:
+                            const TextStyle(
+                          color:
+                              Colors.green,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  else if (requestPending)
+                    Container(
+                      padding:
+                          const EdgeInsets.all(14),
+                      decoration:
+                          BoxDecoration(
+                        color:
+                            Colors.orange.shade50,
+                        borderRadius:
+                            BorderRadius.circular(
+                                12),
+                      ),
+                      child: const Text(
+                        'Payment request pending admin verification.',
+                        style:
+                            TextStyle(
+                          color:
+                              Colors.orange,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      width:
+                          double.infinity,
+                      child:
+                          FilledButton.icon(
+                        onPressed:
+                            requestPremium,
+                        icon: const Icon(
+                          Icons.workspace_premium,
+                        ),
+                        label: const Text(
+                          'Request Premium',
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 15),
-          const Text(
-            'Payment integration will be connected before commercial launch.',
-            textAlign:
-                TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey,
+          const SizedBox(height: 18),
+          const Card(
+            child: Padding(
+              padding:
+                  EdgeInsets.all(18),
+              child: Text(
+                'Payment is verified by the admin before premium access is activated. Do not enter sensitive banking passwords or PINs inside the app.',
+                style:
+                    TextStyle(height: 1.5),
+              ),
             ),
           ),
         ],
@@ -3208,88 +3893,637 @@ class PremiumPage
     );
   }
 
-  Widget _planCard(
-    BuildContext context, {
-    required String title,
-    required String price,
-    required String period,
-    required IconData icon,
-  }) {
-    return Card(
-      margin:
-          const EdgeInsets.only(bottom: 14),
-      child: Padding(
-        padding:
-            const EdgeInsets.all(18),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  child: Icon(icon),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style:
-                        const TextStyle(
-                      fontSize: 19,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+  String _date(DateTime? date) {
+    if (date == null) return '-';
+
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class PaymentMethodDialog
+    extends StatelessWidget {
+  const PaymentMethodDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title:
+          const Text('Payment Method'),
+      content: Column(
+        mainAxisSize:
+            MainAxisSize.min,
+        children: [
+          const Text(
+            'Select the method you used to pay Rs. 2,000.',
+          ),
+          const SizedBox(height: 15),
+          ListTile(
+            leading:
+                const Icon(Icons.account_balance),
+            title:
+                const Text('Bank Transfer'),
+            onTap: () =>
+                Navigator.pop(
+              context,
+              'Bank Transfer',
             ),
-            const SizedBox(height: 15),
-            Row(
-              crossAxisAlignment:
-                  CrossAxisAlignment.end,
-              children: [
-                Text(
-                  price,
-                  style:
-                      const TextStyle(
-                    fontSize: 28,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 5),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(
-                          bottom: 4),
-                  child: Text(period),
-                ),
-              ],
+          ),
+          ListTile(
+            leading:
+                const Icon(Icons.phone_android),
+            title:
+                const Text('Mobile Wallet'),
+            onTap: () =>
+                Navigator.pop(
+              context,
+              'Mobile Wallet',
             ),
-            const SizedBox(height: 15),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(
-                          context)
-                      .showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Premium payment will be enabled before launch.',
-                      ),
-                    ),
-                  );
-                },
-                child:
-                    const Text('Choose Plan'),
-              ),
+          ),
+          ListTile(
+            leading:
+                const Icon(Icons.payment),
+            title:
+                const Text('Other'),
+            onTap: () =>
+                Navigator.pop(
+              context,
+              'Other',
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+
+/* ============================================================
+   ADMIN PANEL
+============================================================ */
+
+class AdminPage
+    extends StatefulWidget {
+  const AdminPage({super.key});
+
+  @override
+  State<AdminPage> createState() =>
+      _AdminPageState();
+}
+
+class _AdminPageState
+    extends State<AdminPage> {
+  int tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!FirebaseService.isAdmin) {
+      return Scaffold(
+        appBar: AppBar(
+          title:
+              const Text('Admin Panel'),
+        ),
+        body: const Center(
+          child: Text(
+            'Admin access required.',
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title:
+            const Text('Admin Panel'),
+      ),
+      body: tab == 0
+          ? const AdminBusinesses()
+          : const AdminPremiumRequests(),
+      bottomNavigationBar:
+          NavigationBar(
+        selectedIndex: tab,
+        onDestinationSelected:
+            (value) {
+          setState(() {
+            tab = value;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon:
+                Icon(Icons.business),
+            label: 'Businesses',
+          ),
+          NavigationDestination(
+            icon: Icon(
+                Icons.workspace_premium),
+            label: 'Premium',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ============================================================
+   ADMIN BUSINESSES
+============================================================ */
+
+class AdminBusinesses
+    extends StatelessWidget {
+  const AdminBusinesses({super.key});
+
+  Future<void> approve(
+    BuildContext context,
+    String id,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('businesses')
+        .doc(id)
+        .update({
+      'status': 'approved',
+      'approvedAt':
+          FieldValue.serverTimestamp(),
+      'approvedBy':
+          FirebaseService.user?.uid ?? '',
+    });
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content:
+            Text('Business approved.'),
+      ),
+    );
+  }
+
+  Future<void> reject(
+    BuildContext context,
+    String id,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('businesses')
+        .doc(id)
+        .update({
+      'status': 'rejected',
+      'rejectedAt':
+          FieldValue.serverTimestamp(),
+      'rejectedBy':
+          FirebaseService.user?.uid ?? '',
+    });
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content:
+            Text('Business rejected.'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore
+          .instance
+          .collection('businesses')
+          .orderBy(
+            'createdAt',
+            descending: true,
+          )
+          .snapshots(),
+      builder:
+          (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+            ),
+          );
+        }
+
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const Center(
+            child:
+                CircularProgressIndicator(),
+          );
+        }
+
+        final docs =
+            snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return const Center(
+            child:
+                Text('No businesses yet.'),
+          );
+        }
+
+        return ListView.builder(
+          padding:
+              const EdgeInsets.all(16),
+          itemCount: docs.length,
+          itemBuilder:
+              (_, index) {
+            final doc = docs[index];
+
+            final data =
+                doc.data()
+                    as Map<String,
+                        dynamic>;
+
+            final status =
+                data['status']
+                        ?.toString() ??
+                    'pending';
+
+            return Card(
+              margin:
+                  const EdgeInsets.only(
+                      bottom: 12),
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          child: Icon(
+                            Icons.business,
+                          ),
+                        ),
+                        const SizedBox(
+                            width: 10),
+                        Expanded(
+                          child: Text(
+                            data['name']
+                                    ?.toString() ??
+                                'Business',
+                            style:
+                                const TextStyle(
+                              fontSize: 17,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                        height: 10),
+                    Text(
+                      'Category: ${data['category'] ?? ''}',
+                    ),
+                    Text(
+                      'Address: ${data['address'] ?? ''}',
+                    ),
+                    Text(
+                      'Owner: ${data['ownerEmail'] ?? ''}',
+                    ),
+                    const SizedBox(
+                        height: 10),
+                    Chip(
+                      label: Text(
+                        status
+                            .toUpperCase(),
+                      ),
+                    ),
+                    const SizedBox(
+                        height: 8),
+                    if (status !=
+                        'approved')
+                      SizedBox(
+                        width:
+                            double.infinity,
+                        child:
+                            FilledButton.icon(
+                          onPressed:
+                              () => approve(
+                            context,
+                            doc.id,
+                          ),
+                          icon: const Icon(
+                            Icons.check,
+                          ),
+                          label: const Text(
+                            'Approve Business',
+                          ),
+                        ),
+                      ),
+                    if (status !=
+                        'rejected')
+                      SizedBox(
+                        width:
+                            double.infinity,
+                        child:
+                            OutlinedButton.icon(
+                          onPressed:
+                              () => reject(
+                            context,
+                            doc.id,
+                          ),
+                          icon: const Icon(
+                            Icons.close,
+                          ),
+                          label: const Text(
+                            'Reject Business',
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/* ============================================================
+   ADMIN PREMIUM REQUESTS
+============================================================ */
+
+class AdminPremiumRequests
+    extends StatelessWidget {
+  const AdminPremiumRequests({
+    super.key,
+  });
+
+  Future<void> approve(
+    BuildContext context,
+    String requestId,
+    String userId,
+    String? businessId,
+  ) async {
+    final expiry =
+        DateTime.now().add(
+      const Duration(days: 30),
+    );
+
+    final batch =
+        FirebaseFirestore.instance.batch();
+
+    final userRef =
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId);
+
+    final requestRef =
+        FirebaseFirestore.instance
+            .collection('premiumRequests')
+            .doc(requestId);
+
+    batch.set(
+      userRef,
+      {
+        'premium': true,
+        'premiumPlan': 'monthly',
+        'premiumPrice':
+            AppConfig.monthlyPremiumPrice,
+        'premiumExpiry':
+            Timestamp.fromDate(expiry),
+        'premiumActivatedAt':
+            FieldValue.serverTimestamp(),
+        'premiumActivatedBy':
+            FirebaseService.user?.uid ?? '',
+      },
+      SetOptions(merge: true),
+    );
+
+    batch.update(
+      requestRef,
+      {
+        'status': 'approved',
+        'approvedAt':
+            FieldValue.serverTimestamp(),
+        'approvedBy':
+            FirebaseService.user?.uid ?? '',
+        'premiumExpiry':
+            Timestamp.fromDate(expiry),
+      },
+    );
+
+    if (businessId != null &&
+        businessId.isNotEmpty) {
+      final businessRef =
+          FirebaseFirestore.instance
+              .collection('businesses')
+              .doc(businessId);
+
+      batch.set(
+        businessRef,
+        {
+          'premium': true,
+          'premiumExpiry':
+              Timestamp.fromDate(expiry),
+        },
+        SetOptions(merge: true),
+      );
+    }
+
+    await batch.commit();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content:
+            Text('Premium activated.'),
+      ),
+    );
+  }
+
+  Future<void> reject(
+    BuildContext context,
+    String requestId,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('premiumRequests')
+        .doc(requestId)
+        .update({
+      'status': 'rejected',
+      'rejectedAt':
+          FieldValue.serverTimestamp(),
+      'rejectedBy':
+          FirebaseService.user?.uid ?? '',
+    });
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content:
+            Text('Premium request rejected.'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore
+          .instance
+          .collection('premiumRequests')
+          .where(
+            'status',
+            isEqualTo: 'pending',
+          )
+          .snapshots(),
+      builder:
+          (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+            ),
+          );
+        }
+
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const Center(
+            child:
+                CircularProgressIndicator(),
+          );
+        }
+
+        final docs =
+            snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No pending premium requests.',
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding:
+              const EdgeInsets.all(16),
+          itemCount: docs.length,
+          itemBuilder:
+              (_, index) {
+            final doc = docs[index];
+
+            final data =
+                doc.data()
+                    as Map<String,
+                        dynamic>;
+
+            return Card(
+              margin:
+                  const EdgeInsets.only(
+                      bottom: 12),
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.workspace_premium,
+                          color: Colors.orange,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Premium Request',
+                          style:
+                              TextStyle(
+                            fontSize: 18,
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                        height: 12),
+                    Text(
+                      'Name: ${data['name'] ?? ''}',
+                    ),
+                    Text(
+                      'Email: ${data['email'] ?? ''}',
+                    ),
+                    Text(
+                      'Plan: Monthly',
+                    ),
+                    Text(
+                      'Amount: Rs. ${data['amount'] ?? AppConfig.monthlyPremiumPrice}',
+                    ),
+                    Text(
+                      'Payment method: ${data['paymentMethod'] ?? ''}',
+                    ),
+                    const SizedBox(
+                        height: 14),
+                    SizedBox(
+                      width:
+                          double.infinity,
+                      child:
+                          FilledButton.icon(
+                        onPressed: () =>
+                            approve(
+                          context,
+                          doc.id,
+                          data['userId']
+                                  ?.toString() ??
+                              '',
+                          data['businessId']
+                              ?.toString(),
+                        ),
+                        icon: const Icon(
+                          Icons.check,
+                        ),
+                        label: const Text(
+                          'Approve & Activate',
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width:
+                          double.infinity,
+                      child:
+                          OutlinedButton.icon(
+                        onPressed: () =>
+                            reject(
+                          context,
+                          doc.id,
+                        ),
+                        icon: const Icon(
+                          Icons.close,
+                        ),
+                        label: const Text(
+                          'Reject',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/* ============================================================
+   NOTIFICATIONS
+============================================================ */
 
 class NotificationsPage
     extends StatelessWidget {
@@ -3297,33 +4531,120 @@ class NotificationsPage
 
   @override
   Widget build(BuildContext context) {
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title:
+              const Text('Notifications'),
+        ),
+        body: const Center(
+          child:
+              Text('Login to view notifications.'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title:
             const Text('Notifications'),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.notifications_none,
-              size: 70,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 15),
-            Text(
-              'No new notifications.',
-              style:
-                  TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore
+            .instance
+            .collection('notifications')
+            .where(
+              'userId',
+              isEqualTo: user.uid,
+            )
+            .snapshots(),
+        builder:
+            (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Could not load notifications.',
+              ),
+            );
+          }
+
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child:
+                  CircularProgressIndicator(),
+            );
+          }
+
+          final docs =
+              snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment:
+                    MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    size: 70,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 15),
+                  Text(
+                    'No new notifications.',
+                    style:
+                        TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding:
+                const EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder:
+                (_, index) {
+              final data =
+                  docs[index].data()
+                      as Map<String,
+                          dynamic>;
+
+              return Card(
+                child: ListTile(
+                  leading:
+                      const CircleAvatar(
+                    child:
+                        Icon(Icons.notifications),
+                  ),
+                  title: Text(
+                    data['title']
+                            ?.toString() ??
+                        'Notification',
+                  ),
+                  subtitle: Text(
+                    data['message']
+                            ?.toString() ??
+                        '',
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
 }
+
+/* ============================================================
+   SETTINGS
+============================================================ */
 
 class SettingsPage
     extends StatelessWidget {
@@ -3345,17 +4666,6 @@ class SettingsPage
                 const Text('Language'),
             subtitle:
                 const Text('English'),
-            onTap: () {
-              ScaffoldMessenger.of(
-                      context)
-                  .showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Language settings will be expanded before launch.',
-                  ),
-                ),
-              );
-            },
           ),
           ListTile(
             leading: const Icon(
@@ -3409,6 +4719,10 @@ class SettingsPage
   }
 }
 
+/* ============================================================
+   HELP
+============================================================ */
+
 class HelpPage
     extends StatelessWidget {
   const HelpPage({super.key});
@@ -3442,25 +4756,25 @@ class HelpPage
           ),
           const SizedBox(height: 12),
           const Text(
-            'Open a business profile to call, WhatsApp, visit its website or open it in Google Maps.',
+            'Business listings are reviewed by the administrator before approval.',
           ),
-          const SizedBox(height: 25),
-          Card(
-            child: ListTile(
-              leading:
-                  const Icon(Icons.email),
-              title:
-                  const Text('Contact Support'),
-              subtitle: const Text(
-                'Support contact will be configured before launch.',
-              ),
-            ),
+          const SizedBox(height: 12),
+          const Text(
+            'Premium costs Rs. 2,000 per month and is activated after payment verification.',
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Premium users do not see the in-app ad placeholders.',
           ),
         ],
       ),
     );
   }
 }
+
+/* ============================================================
+   ABOUT
+============================================================ */
 
 class AboutPage
     extends StatelessWidget {
