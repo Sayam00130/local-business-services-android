@@ -23,11 +23,24 @@ jobs:
             --project-name local_business_services \
             app
 
-      - name: Set Firebase package name
+      - name: Set Android package name
         working-directory: app/android/app
         run: |
           sed -i 's/applicationId = "com.localbusinessservices.local_business_services"/applicationId = "com.localbusinessservices"/' build.gradle.kts
           sed -i 's/namespace = "com.localbusinessservices.local_business_services"/namespace = "com.localbusinessservices"/' build.gradle.kts
+
+      - name: Fix MainActivity package
+        run: |
+          mkdir -p app/android/app/src/main/kotlin/com/localbusinessservices
+          cat > app/android/app/src/main/kotlin/com/localbusinessservices/MainActivity.kt <<'EOF'
+          package com.localbusinessservices
+
+          import io.flutter.embedding.android.FlutterActivity
+
+          class MainActivity: FlutterActivity()
+          EOF
+
+          rm -rf app/android/app/src/main/kotlin/com/example
 
       - name: Copy main.dart
         run: |
