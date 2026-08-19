@@ -22,6 +22,16 @@ jobs:
         run: |
           printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
 
+            - name: Find Flutter project
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          echo "WORKSPACE:"
+          pwd
+          echo "FILES:"
+          ls -la
+          echo "PUBSPEC FILES:"
+          find . -name "pubspec.yaml" -print
+
       - name: Get Flutter packages
         run: |
           cd "$GITHUB_WORKSPACE"
